@@ -193,26 +193,6 @@ public class ProbabilisticTransformationStrategy extends CacheTransformationStra
 	}
 
 	/**
-	 * eg: given a VarCombinationForIngredient vc1 and a VarCombinationForIngredient vc2
-	 * if vc1 has 3 vars in the following order: "f", "max", "min"
-	 * and vc2 has  3 vars in the order        : "f", "min, "max"
-	 * <p>
-	 * then originalOrderOfVc1 == "f max min"
-	 * and  originalOrderOfVc2 == "f min max"
-	 * <p>
-	 * In this case vc2 has priority given its alphabetical order compared to vc1
-	 *
-	 * @return
-	 */
-	private Comparator<VarCombinationForIngredient> sortByVarOrder() {
-		return (vc1, vc2) -> {
-			String originalOrderOfVc1 = getOriginalOrderOrVars(vc1);
-			String originalOrderOfVc2 = getOriginalOrderOrVars(vc2);
-			return originalOrderOfVc2.compareTo(originalOrderOfVc1);
-		};
-	}
-
-	/**
 	 * eg: given varCombinationForIngredient with the 3 vars "f", "min", "max"
 	 * return "f min max"
 	 *
