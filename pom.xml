@@ -310,6 +310,7 @@
 								<source>src-cardumen/main/java</source>
 								<source>src-deeprepair/main/java</source>
 								<source>src-3sfix/main/java</source>
+								<source>src-typesafe/main/java</source>
 							</sources>
 						</configuration>
 					</execution>
