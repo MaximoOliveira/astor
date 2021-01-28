@@ -17,7 +17,8 @@ public enum ExecutionMode {
 	MutRepair(Arrays.asList("mutation","jmutrepair", "mutrepair")),
 	EXASTOR(Arrays.asList("exhaustive", "exastor")),
 	SCAFFOLD(Collections.singletonList("scaffold")),
-	custom(Collections.singletonList("custom"));
+	custom(Collections.singletonList("custom")),
+	TYPESAFE(Collections.singletonList("typesafe"));
 
 	private List<String> acceptedNames;
 

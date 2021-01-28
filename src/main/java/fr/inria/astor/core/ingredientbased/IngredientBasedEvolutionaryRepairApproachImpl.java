@@ -19,15 +19,12 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.ProbabilisticIngredientStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.SimpleRandomSelectionIngredientStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.TypeSafeProbabilisticIngredientStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.ExpressionTypeIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.GlobalBasicIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.LocalIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.PackageBasicFixSpace;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.ClusterIngredientTransformation;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NoIngredientTransformationWithCheck;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.ProbabilisticTransformationStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.RandomTransformationStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.*;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSelectionStrategy;
@@ -227,6 +224,10 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 				// new RandomSelectionTransformedIngredientStrategy(ingredientspace);
 			} else if (ingStrategySt.equals("name-probability-based")) {
 				ingStrategy = new ProbabilisticIngredientStrategy(ingredientspace);
+
+			} else if (ingStrategySt.equals("typesafe-name-probability-based")){
+				ingStrategy = new TypeSafeProbabilisticIngredientStrategy(ingredientspace);
+
 			} else if (ingStrategySt.equals("code-similarity-based")) {
 				ingStrategy = new CloneIngredientSearchStrategy(ingredientspace);
 			} else {
@@ -264,7 +265,10 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 				ingredientTransformationStrategyLoaded = (new ClusterIngredientTransformation());
 			} else if (ingredientTransformationStrategy.equals("name-probability-based")) {
 				ingredientTransformationStrategyLoaded = (new ProbabilisticTransformationStrategy());
-			} else {
+			} else if(ingredientTransformationStrategy.equals("typesafe-name-probability-based")){
+				ingredientTransformationStrategyLoaded = new TypeSafeProbabilisticTransformationStrategy();
+			}
+			else {
 				ingredientTransformationStrategyLoaded = ((IngredientTransformationStrategy) PlugInLoader
 						.loadPlugin(ExtensionPoints.INGREDIENT_TRANSFORM_STRATEGY));
 			}
