@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -54,6 +55,10 @@ public class SpoonClassCompiler implements VariantCompiler {
 	public CompilationResult compile(ProgramVariant instance, URL[] cp) {
 		List<CtClass> ctClasses = new ArrayList<CtClass>(instance.getBuiltClasses().values());
 		CompilationResult compilation2 = this.compile(ctClasses, cp);
+
+		String sub = "cannot assign a value to final variable";
+		List<String> correctList = compilation2.getErrorList().stream().filter(error -> !error.contains(sub)).collect(Collectors.toList());
+		compilation2.setErrorList(correctList);
 
 		return compilation2;
 	}

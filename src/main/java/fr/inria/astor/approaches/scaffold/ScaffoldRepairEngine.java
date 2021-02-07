@@ -98,7 +98,7 @@ public class ScaffoldRepairEngine extends AstorCoreEngine {
 	@Override
 	public void initPopulation(List<SuspiciousCode> suspicious) throws Exception {
 
-		this.mutatorSupporter.getFactory().getEnvironment().setCommentEnabled(true);
+		this.mutatorSupporter.getFactory().getEnvironment().setCommentEnabled(false);
 		
 		super.initPopulation(suspicious);
 

@@ -261,10 +261,7 @@ public class ProgramVariantFactory {
 			modifPoint.setCodeElement(ctElement);
 			modifPoint.setContextOfModificationPoint(contextOfPoint);
 			suspiciousModificationPoints.add(modifPoint);
-			log.debug("--ModifPoint:" + ctElement.getClass().getSimpleName() + ", suspValue "
-					+ suspiciousCode.getSuspiciousValue() + ", line " + ctElement.getPosition().getLine() + ", file "
-					+ ((ctElement.getPosition().getFile() == null) ? "-null-file-"
-							: ctElement.getPosition().getFile().getName()));
+
 		}
 		return suspiciousModificationPoints;
 	}
@@ -313,7 +310,6 @@ public class ProgramVariantFactory {
 	 * resolved before, it get it from a "cache" of CtClasses stored in the Program
 	 * Instance.
 	 * 
-	 * @param suspiciousCode
 	 * @param progInstance
 	 * @return
 	 */

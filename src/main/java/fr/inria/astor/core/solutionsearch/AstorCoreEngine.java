@@ -77,6 +77,7 @@ import fr.inria.astor.util.TimeUtil;
 import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
+import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
@@ -413,7 +414,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
     /**
      * Compiles and validates a created variant.
      *
-     * @param parentVariant
      * @param generation
      * @return true if the variant is a solution. False otherwise.
      * @throws Exception
@@ -455,6 +455,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
                     + compilation.getErrorList());
             currentStat.increment(GeneralStatEnum.NR_FAILLING_COMPILATIONS);
             programVariant.setFitness(this.fitnessFunction.getWorstMaxFitnessValue());
+            //return true;
         }
         // In case that the variant a) does not compile; b) compiles but it's
         // not adequate
@@ -505,7 +506,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
      * GenOperationInstance
      *
      * @param variant
-     * @param operationofGen
      */
     protected void updateVariantGenList(ProgramVariant variant, int generation) {
         List<OperatorInstance> operations = variant.getOperations().get(generation);
@@ -817,7 +817,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
      * GenOperationInstance
      *
      * @param variant        variant to modify the modification point information
-     * @param operationofGen operator to apply in the variant.
      */
     protected void updateVariantGenList(ProgramVariant variant, OperatorInstance operation) {
         operation.getOperationApplied().updateProgramVariant(operation, variant);
@@ -837,7 +836,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
     /**
      * Apply a given Mutation to the node referenced by the operation
      *
-     * @param operation
      * @throws IllegalAccessException
      */
     protected void applyNewMutationOperationToSpoonElement(OperatorInstance operationInstance)

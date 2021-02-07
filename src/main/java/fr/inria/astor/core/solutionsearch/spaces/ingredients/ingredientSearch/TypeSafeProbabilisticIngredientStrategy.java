@@ -102,12 +102,14 @@ public class TypeSafeProbabilisticIngredientStrategy extends ProbabilisticIngred
         List<Ingredient> validIngredients = new ArrayList<>(baseElements);
         validIngredients.removeAll(privateFieldsFromForeignClass);
         validIngredients.removeAll(privateMethodFromInvalidClass);
-        return validIngredients;
+        return validIngredients.stream().filter(ingredient -> !ingredient.toString().isEmpty())
+                .collect(Collectors.toList());
 
 
     }
 
-    /** Get the ingredients that represent, private or non-static methods, from a class that is different or isnt
+    /**
+     * Get the ingredients that represent, private or non-static methods, from a class that is different or isnt
      * a sub-class from the class of the MP. The class of the ingredient can also not be Abstract.
      *
      * @param ctInvocations
@@ -127,7 +129,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends ProbabilisticIngred
                     boolean fromDifferentClass = !classOfIngredient.equals(classOfMP);
                     boolean isSubtype = classOfIngredient.isSubtypeOf(classOfMP.getReference());
                     // if the method is (private or non-static) AND from a different class
-                    return (isPrivate || !isStatic) && (fromDifferentClass || !isSubtype || classIsAbstract) ;
+                    return (isPrivate || !isStatic) && (fromDifferentClass || !isSubtype || classIsAbstract);
                 }).collect(Collectors.toList());
     }
 
@@ -142,6 +144,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends ProbabilisticIngred
                         field = ctTypeAccess.getParent().getElements(new TypeFilter<>(CtFieldRead.class))
                                 .stream().findFirst().orElse(null);
                     if (field != null && !((CtInvocationImpl) ingredient.getCode()).getArguments().contains(field)) {
+                        if (field.getVariable().getFieldDeclaration() == null) return false;
                         boolean isPrivate = field.getVariable().getFieldDeclaration().isPrivate();
                         CtType<?> classOfIngredient = ingredient.getCode().getPosition().getCompilationUnit().getMainType();
                         boolean fromDifferentClass = !classOfIngredient.equals(classOfMP);
