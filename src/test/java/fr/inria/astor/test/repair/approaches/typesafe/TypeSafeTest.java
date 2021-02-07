@@ -14,6 +14,78 @@ import static org.junit.Assert.assertNotNull;
 public class TypeSafeTest {
 
     @Test
+    public void testTypeSafeM74() throws Exception {
+        CommandSummary command = MathCommandsTests.getMath74Command();
+
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-flthreshold", "0.5");
+        command.command.put("-maxtime", "60");
+        command.command.put("-seed", "400");
+        command.command.put("-maxgen", "8");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
+        command.command.put("-maxVarCombination", "100");
+        command.command.put("-stopfirst", "false");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafeApproach = (TypeSafeApproach) main1.getEngine();
+
+    }
+
+    @Test
+    public void testTypeSafeM57() throws Exception {
+        CommandSummary command = MathCommandsTests.getMath57Command();
+
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-flthreshold", "0.1");
+        command.command.put("-maxtime", "60");
+        command.command.put("-seed", "400");
+        command.command.put("-maxgen", "100");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
+        command.command.put("-maxVarCombination", "1000");
+        command.command.put("-stopfirst", "false");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafeApproach = (TypeSafeApproach) main1.getEngine();
+
+    }
+
+    @Test
+    public void testTypeSafeM20() throws Exception {
+        CommandSummary command = MathCommandsTests.getMath20Command();
+
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-flthreshold", "0.5");
+        command.command.put("-maxtime", "60");
+        command.command.put("-seed", "400");
+        command.command.put("-maxgen", "100");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
+        command.command.put("-maxVarCombination", "100");
+        command.command.put("-stopfirst", "false");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafeApproach = (TypeSafeApproach) main1.getEngine();
+
+    }
+
+    @Test
     public void testTypeSafeM32() throws Exception {
         CommandSummary command = MathCommandsTests.getMath32Command();
 
@@ -51,7 +123,7 @@ public class TypeSafeTest {
         command.command.put("-maxgen", "872");
         command.command.put("-population", "1");
         command.command.put("-scope", scope.toString().toLowerCase());
-        command.command.put("-parameters", "disablelog:false");
+        command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
         command.command.put("-maxVarCombination", "100");
         command.command.put("-stopfirst", "false");
 

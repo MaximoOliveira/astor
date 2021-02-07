@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import fr.inria.astor.approaches.typesafe.TypeSafeOperatorSpace;
+import fr.inria.astor.core.solutionsearch.navigation.*;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -50,12 +51,6 @@ import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.extension.AstorExtensionPoint;
 import fr.inria.astor.core.solutionsearch.extension.SolutionVariantSortCriterion;
 import fr.inria.astor.core.solutionsearch.extension.VariantCompiler;
-import fr.inria.astor.core.solutionsearch.navigation.InOrderSuspiciousNavigation;
-import fr.inria.astor.core.solutionsearch.navigation.SequenceSuspiciousNavigationStrategy;
-import fr.inria.astor.core.solutionsearch.navigation.SuspiciousNavigationStrategy;
-import fr.inria.astor.core.solutionsearch.navigation.SuspiciousNavigationValues;
-import fr.inria.astor.core.solutionsearch.navigation.UniformRandomSuspiciousNavigation;
-import fr.inria.astor.core.solutionsearch.navigation.WeightRandomSuspiciousNavitation;
 import fr.inria.astor.core.solutionsearch.population.FitnessFunction;
 import fr.inria.astor.core.solutionsearch.population.PopulationController;
 import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
@@ -816,7 +811,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
      * This method updates modification point of a variant according to a created
      * GenOperationInstance
      *
-     * @param variant        variant to modify the modification point information
+     * @param variant variant to modify the modification point information
      */
     protected void updateVariantGenList(ProgramVariant variant, OperatorInstance operation) {
         operation.getOperationApplied().updateProgramVariant(operation, variant);
@@ -982,6 +977,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
             suspiciousNavigationStrategy = new InOrderSuspiciousNavigation();
         } else if (SuspiciousNavigationValues.WEIGHT.toString().equals(mode))
             suspiciousNavigationStrategy = new WeightRandomSuspiciousNavitation();
+        else if (SuspiciousNavigationValues.TYPESAFE_WEIGHT.toString().equals(mode))
+            suspiciousNavigationStrategy = new TypeSafeWeightRandomSuspiciousNavigation();
         else if (SuspiciousNavigationValues.RANDOM.toString().equals(mode)) {
             suspiciousNavigationStrategy = new UniformRandomSuspiciousNavigation();
         } else if (SuspiciousNavigationValues.SEQUENCE.toString().equals(mode)) {
