@@ -172,38 +172,36 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
         this.printFinalStatus();
 
-        if (this.solutions.size() > 0) {
-            this.sortPatches();
-            try {
+        this.sortPatches();
+        try {
 
-                this.computePatchDiff(this.solutions);
+            this.computePatchDiff(this.solutions);
 
-            } catch (Exception e) {
-                log.error("Problem at computing diff" + e);
-            }
-            log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
+        } catch (Exception e) {
+            log.error("Problem at computing diff" + e);
+        }
+        log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
 
-            patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
+        patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
 
-            // Reporting results
-            String output = this.projectFacade.getProperties().getWorkingDirRoot();
-            for (ReportResults out : this.getOutputResults()) {
-                out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
-                if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
-                    File fout = new File(output);
+        // Reporting results
+        String output = this.projectFacade.getProperties().getWorkingDirRoot();
+        for (ReportResults out : this.getOutputResults()) {
+            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+            if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
+                File fout = new File(output);
 
-                    try {
-                        FileUtils.deleteDirectory(fout);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        log.error(e);
-                    }
+                try {
+                    FileUtils.deleteDirectory(fout);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.error(e);
                 }
             }
-
         }
 
     }
+
 
     protected void computePatchDiff(List<ProgramVariant> solutions) throws Exception {
 

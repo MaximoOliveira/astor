@@ -125,7 +125,7 @@ public class TypeSafeTest {
         command.command.put("-scope", scope.toString().toLowerCase());
         command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
         command.command.put("-maxVarCombination", "100");
-        command.command.put("-stopfirst", "false");
+        command.command.put("-stopfirst", "true");
 
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
