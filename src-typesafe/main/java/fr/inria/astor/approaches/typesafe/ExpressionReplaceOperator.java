@@ -28,40 +28,14 @@ public class ExpressionReplaceOperator extends ReplaceOp {
         CtExpression elementOriginalCloned = (CtExpression) MutationSupporter.clone(elementToModify);
 
         CtElement elFixIngredient = opInstance.getModified();
-        //if(p.getGenerationSource() == 871)
-        //addThrowableIfNeeded(elFixIngredient, elementToModify);
-        /*if (addedThrows) {
-            MutationSupporter.getAllClasses().forEach(ctType -> {
-                programVariantFactory.resolveCtClass(ctType.getQualifiedName(), p);
-            });
-            addThrowsToMethodsThatNeed(elementToModify, elFixIngredient);
-        }*/
-
-        CtLocalVariable variableToBeInserted = checkIfRequiresLocalVariable(elFixIngredient, elementToModify);
-        if (variableToBeInserted != null) {
-            CtBlock block = elFixIngredient.getParent(CtBlock.class);
-            if (variableToBeInserted != null) {
-                block.insertBegin(variableToBeInserted);
-            }
-        }
-
-        /**/
-
         List<CtTypeReference> exceptions = needsTryCatch(elFixIngredient, elementToModify);
 
         // we transform the Spoon model
 
         try {
             opInstance.getModificationPoint().getCodeElement().replace(elFixIngredient);
-            if(exceptions != null){
-                CtTryImpl ctTry = new CtTryImpl();
-                CtCatchImpl ctCatch = new CtCatchImpl();
-                CtCatchVariableImpl ctCatchVariable = new CtCatchVariableImpl();
-                ctCatchVariable.setMultiTypes(new ArrayList<>(exceptions));
-                ctCatch.setParameter(ctCatchVariable);
-                CtStatement statement = opInstance.getModificationPoint().getCodeElement().getParent(new TypeFilter<>(CtStatement.class));
-                ctTry.setBody(statement);
-                statement.replace(ctTry);
+            if (!exceptions.isEmpty()) {
+                addTryCatchIfNeeded(opInstance, exceptions);
             }
         } catch (Exception e) {
             log.error("error to modify " + elementOriginalCloned + " to " + elFixIngredient);
@@ -84,6 +58,50 @@ public class ExpressionReplaceOperator extends ReplaceOp {
 
         return true;
     }
+
+    private void addTryCatchIfNeeded(OperatorInstance opInstance, List<CtTypeReference> xcx) {
+        // Create try catch
+        CtMethod methodOfETM = opInstance.getModificationPoint().getCodeElement().getParent(CtMethodImpl.class);
+        CtBlockImpl blockCode = (CtBlockImpl) methodOfETM.getBody().clone();
+        CtTryImpl ctTry = createTryCatch(blockCode, xcx, methodOfETM.getType());
+        CtBlockImpl newBlock = new CtBlockImpl();
+        newBlock.addStatement(ctTry);
+        CtMethod newMethod = methodOfETM.clone();
+        newMethod.setBody(newBlock);
+        opInstance.getModificationPoint().getCodeElement().getParent(CtMethodImpl.class).replace(newMethod);
+    }
+
+    private CtTryImpl createTryCatch(CtBlock bodyOfTry, List<CtTypeReference> catchedExceptions,
+                                     CtTypeReference returnType) {
+        // Prepare Catched Exceptions
+        CtCatchImpl ctCatch = new CtCatchImpl();
+        CtCatchVariableImpl ctCatchVariable = new CtCatchVariableImpl();
+        ctCatchVariable.setMultiTypes(catchedExceptions);
+        ctCatchVariable.setSimpleName("eee");
+        ctCatch.setParameter(ctCatchVariable);
+
+        //Prepare Catch Body
+        CtLiteral ctLiteral;
+        if (returnType.toString().equals("void")) {
+            ctLiteral = null;
+        } else if (returnType.toString().equals("boolean")) {
+            ctLiteral = MutationSupporter.factory.Code().createLiteral(Boolean.FALSE);
+        } else if (returnType.isPrimitive()) {
+            ctLiteral = MutationSupporter.factory.Code().createLiteral(0);
+        } else {
+            ctLiteral = MutationSupporter.factory.Code().createLiteral(null);
+        }
+        CtReturnImpl ctReturn = new CtReturnImpl();
+        ctReturn.setReturnedExpression(ctLiteral);
+        ctCatch.setBody(ctReturn);
+
+        // Prepare Try Body
+        CtTryImpl ctTry = new CtTryImpl();
+        ctTry.setBody(bodyOfTry);
+        ctTry.addCatcher(ctCatch);
+        return ctTry;
+    }
+
 
     private void addThrowsToMethodsThatNeed(CtExpression elementToModify, CtElement elFixIngredient) {
         //List<CtInvocationImpl> invocations = MutationSupporter.getInvocations();
@@ -119,15 +137,14 @@ public class ExpressionReplaceOperator extends ReplaceOp {
 
         CtClass ctClass = fixIngredient.getParent(CtClass.class);
         CtInvocationImpl invocation = fixIngredient.getElements(new TypeFilter<>(CtInvocationImpl.class)).stream().findFirst().orElse(null);
-        if (invocation == null) return null;
+        if (invocation == null) return new ArrayList<>();
         CtExecutableReference executable = invocation.getExecutable();
         List<CtTypeReference<?>> myList = executable.getParameters();
         CtTypeReference<?>[] zz = myList.toArray(new CtTypeReference<?>[0]);
         CtMethod methodOfFixIngredient = ctClass.getMethod(executable.getType(), executable.getSimpleName(), zz);
-        if (methodOfFixIngredient == null) return null;
-        //ctClass.getMethod(invocation.getExecutable().getType(),invocation.getExecutable().getSimpleName(),invocation.getExecutable().getParameters());
+        if (methodOfFixIngredient == null) return new ArrayList<>();
         CtMethodImpl methodOfElementToModify = elementToModify.getParent(CtMethodImpl.class);
-        if (methodOfFixIngredient == null || methodOfElementToModify == null) return null;
+        if (methodOfFixIngredient == null || methodOfElementToModify == null) return new ArrayList<>();
         Set<CtTypeReference> thrownTypesFromFixIngredient = methodOfFixIngredient.getThrownTypes();
         Set<CtTypeReference> thrownTypesFromElementToModify = methodOfElementToModify.getThrownTypes();
 
@@ -141,10 +158,6 @@ public class ExpressionReplaceOperator extends ReplaceOp {
         candidatesToBeAdded = candidatesToBeAdded.stream().filter(ctTypeReference ->
                 !supClassesFromETM.contains(ctTypeReference.getSuperclass()))
                 .collect(Collectors.toSet());
-
-
-        if (candidatesToBeAdded.isEmpty())
-            return null;
 
         return new ArrayList<>(candidatesToBeAdded);
     }
