@@ -2,9 +2,12 @@ package fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch;
 
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.TypeSafeExpressionTypeIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
+import fr.inria.astor.util.MapList;
 import fr.inria.astor.util.StringUtil;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtInvocation;
@@ -152,6 +155,38 @@ public class TypeSafeProbabilisticIngredientStrategy extends ProbabilisticIngred
                     }
                     return false;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Ingredient> getNotExhaustedBaseElements(ModificationPoint modificationPoint,
+                                                        AstorOperator operationType) {
+
+        List<Ingredient> elements = super.getNotExhaustedBaseElements(modificationPoint, operationType);
+
+        if (elements == null) {
+            return null;
+        }
+        if (ConfigurationProperties.getPropertyBool("frequenttemplate")) {
+            log.debug("Defining template order for " + modificationPoint);
+            TypeSafeExpressionTypeIngredientSpace space = (TypeSafeExpressionTypeIngredientSpace) this.getIngredientSpace();
+
+            // Ingredients from space
+            // ingredients to string
+            elements2String = new ArrayList<>();
+            for (Ingredient cm : elements) {
+                elements2String.add(cm.toString());
+            }
+            // Obtaining counting of templates from the space
+            MapList mp = new MapList<>();
+            mp.putAll(space.linkTemplateElements);
+            mp.keySet().removeIf(e -> !elements2String.contains(e));
+
+            // Obtaining accumulate frequency of elements
+            probs = mp.getProb().getProbAccumulative();
+
+        }
+        return elements;
+
     }
 
 

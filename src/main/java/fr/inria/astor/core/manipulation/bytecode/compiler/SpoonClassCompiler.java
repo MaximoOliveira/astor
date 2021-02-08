@@ -56,8 +56,9 @@ public class SpoonClassCompiler implements VariantCompiler {
 		List<CtClass> ctClasses = new ArrayList<CtClass>(instance.getBuiltClasses().values());
 		CompilationResult compilation2 = this.compile(ctClasses, cp);
 
-		String sub = "cannot assign a value to final variable";
-		List<String> correctList = compilation2.getErrorList().stream().filter(error -> !error.contains(sub)).collect(Collectors.toList());
+		String invalidCompilationError = "cannot assign a value to final variable";
+		List<String> correctList = compilation2.getErrorList().stream()
+				.filter(error -> !error.contains(invalidCompilationError)).collect(Collectors.toList());
 		compilation2.setErrorList(correctList);
 
 		return compilation2;

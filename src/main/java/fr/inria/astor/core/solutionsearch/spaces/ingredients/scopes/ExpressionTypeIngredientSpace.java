@@ -171,7 +171,7 @@ public class ExpressionTypeIngredientSpace
 
 			String keyLocation = mapKey(element);
 			CtExpression ctExpr = (CtExpression) element;
-			String returnTypeExpression = (ctExpr.getType() == null) ? "null" : ctExpr.getType().toString();
+			String returnTypeExpression = (ctExpr.getType() == null) ? "null" : ctExpr.getType().getSimpleName();
 			List<Ingredient> ingredients = (List<Ingredient>) mkp.get(keyLocation, returnTypeExpression);
 
 			return ingredients;
@@ -282,7 +282,7 @@ public class ExpressionTypeIngredientSpace
 
 	protected List<Ingredient> getIngrediedientsFromKey(String keyLocation, CtExpression ctExpr) {
 
-		String returnTypeExpression = (ctExpr.getType() != null) ? ctExpr.getType().toString() : "null";
+		String returnTypeExpression = (ctExpr.getType() != null) ? ctExpr.getType().getSimpleName() : "null";
 
 		List<Ingredient> ingredientsKey = (List<Ingredient>) mkp.get(keyLocation, returnTypeExpression);
 
