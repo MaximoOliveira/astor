@@ -1,23 +1,16 @@
 package fr.inria.main.evolution;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.WriterAppender;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-
 import fr.inria.astor.approaches.typesafe.TypeSafeApproach;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+
 import fr.inria.astor.approaches.cardumen.CardumenApproach;
 import fr.inria.astor.approaches.deeprepair.DeepRepairEngine;
 import fr.inria.astor.approaches.jgenprog.JGenProg;
@@ -67,7 +60,6 @@ public class AstorMain extends AbstractMain {
     /**
      * It creates a repair engine according to an execution mode.
      *
-     * @param removeMode
      * @return
      * @throws Exception
      */
