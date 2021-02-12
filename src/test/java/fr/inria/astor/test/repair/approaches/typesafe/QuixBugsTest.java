@@ -33,7 +33,7 @@ public class QuixBugsTest {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("breadth_first_search");
         IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
         command.command.put("-mode", ExecutionMode.TYPESAFE.name());
-        command.command.put("-seed", "100");
+        command.command.put("-seed", "400");
         command.command.put("-maxtime", "60");
         command.command.put("-maxgen", "2000000000");
         command.command.put("-population", "1");
