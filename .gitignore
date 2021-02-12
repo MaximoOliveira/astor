@@ -24,7 +24,7 @@ buildNumber.properties
 /.DS_Store
 /.project
 /spooned/
-examples/Math-issue-280/target/
+/examples/
 
 .DS_Store
 /output_*
