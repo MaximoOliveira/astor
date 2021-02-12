@@ -793,7 +793,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
         variantFactory.setMutatorExecutor(getMutatorSupporter());
 
         this.variants = variantFactory.createInitialPopulation(suspicious,
-                ConfigurationProperties.getPropertyInt("population"), populationControler, projectFacade);
+                ConfigurationProperties.getPropertyInt("population"), projectFacade);
 
         if (variants.isEmpty()) {
             throw new IllegalArgumentException("Any variant created from list of suspicious");
