@@ -138,8 +138,6 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 
 		List<ProgramVariant> temporalInstances = new ArrayList<ProgramVariant>();
 
-		currentStat.increment(GeneralStatEnum.NR_GENERATIONS);
-
 		for (ProgramVariant parentVariant : variants) {
 
 			log.debug("**Parent Variant: " + parentVariant);

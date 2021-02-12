@@ -426,6 +426,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
             this.saveVariant(programVariant);
         }
 
+        currentStat.increment(GeneralStatEnum.NR_GENERATIONS);
         if (childCompiles) {
 
             log.debug("-The child compiles: id " + programVariant.getId());
@@ -448,7 +449,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
                     + compilation.getErrorList());
             currentStat.increment(GeneralStatEnum.NR_FAILLING_COMPILATIONS);
             programVariant.setFitness(this.fitnessFunction.getWorstMaxFitnessValue());
-            //return true;
+            compilation.getErrorList().forEach(error -> {
+                log.warn("----------Failed " + error);
+            });
         }
         // In case that the variant a) does not compile; b) compiles but it's
         // not adequate
