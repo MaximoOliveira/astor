@@ -194,9 +194,6 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 	private Ingredient getNotUsedTransformedElement(ModificationPoint modificationPoint, AstorOperator operator,
 			Ingredient baseIngredient, List<Ingredient> ingredientsAfterTransformation) {
 
-		log.debug("\nIngredient  base: " + StringUtil.trunc(baseIngredient.getCode()) + " from "
-				+ ((CtType) baseIngredient.getCode().getParent(CtType.class)).getQualifiedName());
-
 		log.debug(String.format("Valid Transformed ingredients in mp: %s,  base ingr: %s, : size (%d) ",
 				StringUtil.trunc(modificationPoint.getCodeElement()), StringUtil.trunc(baseIngredient.getCode()),
 				ingredientsAfterTransformation.size()));

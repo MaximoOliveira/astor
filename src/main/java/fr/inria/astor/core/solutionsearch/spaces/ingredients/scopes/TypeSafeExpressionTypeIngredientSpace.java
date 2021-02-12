@@ -7,16 +7,15 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.expand.BinaryOperatorHelper;
-import spoon.reflect.code.CtCodeElement;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.UnaryOperatorKind;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
+import spoon.support.reflect.code.CtLiteralImpl;
 import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
 import java.util.*;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredientSpace {
 
     BinaryOperatorHelper binaryOperatorHelper;
-
 
     public TypeSafeExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
         super(processors);
@@ -59,6 +57,14 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                     if (ConfigurationProperties.getPropertyBool("cleantemplates")) {
                         MutationSupporter.getEnvironment().setNoClasspath(true);// ?
 
+                        if (ctExpr instanceof CtLiteral) {
+                            CtTypeReference type = ((CtLiteral<?>) ctExpr).getType();
+                            CtLiteralImpl ctLiteral = (CtLiteralImpl) ctExpr;
+                            CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, "varname", ctLiteral);
+                            CtElement parent = ctExpr.getParent();
+                            ctExpr = MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
+                            ctExpr.setParent(parent);
+                        }
                         CtCodeElement templateElement = MutationSupporter.clone(ctExpr);
                         formatIngredient(templateElement);
 
@@ -117,12 +123,14 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         uniqueExpandedIngredients.addAll(expandedBinaryOperators);
         uniqueExpandedIngredients.addAll(expandedInvocationsWithExecutables);
         Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = expandInvocationsWithNegation(uniqueExpandedIngredients);
-        uniqueExpandedIngredients.addAll(expandedInvocationsWithNegation);
-
-        return new ArrayList<>(uniqueExpandedIngredients);
+        Set<CtCodeElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
+        set.addAll(uniqueExpandedIngredients);
+        set.addAll(expandedInvocationsWithNegation);
+        return set.stream().filter(i -> !i.toString().equals("null")).collect(Collectors.toList());
     }
 
     private Set<CtUnaryOperatorImpl> expandInvocationsWithNegation(Set<CtCodeElement> invocations) {
+        TypeFactory typeFactory = new TypeFactory();
         Set<CtCodeElement> invocationsWithBooleanReturnType = invocations.stream()
                 .filter(ctInvocation -> ctInvocation instanceof CtInvocationImpl &&
                         ((CtInvocationImpl) ctInvocation).getType().getSimpleName().equals("boolean"))
@@ -135,6 +143,9 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
             ctUnaryOperator.setOperand(clonedInvocation);
             ctUnaryOperator.setParent(invocation.getParent());
             ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
+            CtTypeReference booleanType = typeFactory.booleanPrimitiveType();
+            ctUnaryOperator.setType(booleanType);
+            ctUnaryOperator.setPosition(invocation.getPosition());
             negatedInvocations.add(ctUnaryOperator);
         });
 
@@ -222,20 +233,6 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         }
         log.error("Element is not a expression: " + element.getClass().getCanonicalName());
         return null;
-    }
-
-    protected List<Ingredient> getIngrediedientsFromKey(String keyLocation, CtExpression ctExpr) {
-
-        String returnTypeExpression = (ctExpr.getType() != null) ? ctExpr.getType().toString() : "null";
-
-        List<Ingredient> ingredientsKey = (List<Ingredient>) mkp.get(keyLocation, returnTypeExpression);
-
-        if (!mkp.containsKey(keyLocation, returnTypeExpression)) {
-            ingredientsKey = new CacheList<>();
-            mkp.put(keyLocation, returnTypeExpression, ingredientsKey);
-
-        }
-        return ingredientsKey;
     }
 
 

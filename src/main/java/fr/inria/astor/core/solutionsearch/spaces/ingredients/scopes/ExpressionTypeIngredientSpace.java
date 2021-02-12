@@ -25,13 +25,15 @@ import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPoolLocationType;
 import fr.inria.astor.util.MapList;
-import spoon.reflect.code.CtCodeElement;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldAccess;
-import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.reference.CtTypeReference;
+import spoon.support.reflect.code.CtLiteralImpl;
+import spoon.support.reflect.code.CtVariableAccessImpl;
+import spoon.support.reflect.code.CtVariableReadImpl;
 
 /**
  * 

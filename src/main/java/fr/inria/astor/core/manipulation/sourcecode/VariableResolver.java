@@ -241,7 +241,7 @@ public class VariableResolver {
 			@Override
 			public <T> void visitCtTypeAccess(CtTypeAccess<T> typeAccess) {
 				super.visitCtTypeAccess(typeAccess);
-				// varaccess.add(typeAccess);
+				//add((CtVariableAccess) typeAccess);
 			}
 
 			@Override
@@ -837,9 +837,12 @@ public class VariableResolver {
 		// We find the parent block and we extract the local variables before
 		// the element under analysis
 		CtBlock parentblock = element.getParent(CtBlock.class);
+		//CtElement currentElement = parentblock == null ? element : parentblock.getStatements().get(0);
 		CtElement currentElement = element;
 		if (parentblock != null) {
 			int positionEl = parentblock.getStatements().indexOf(currentElement);
+			if(positionEl == -1)
+				positionEl = parentblock.getStatements().size();
 			variables.addAll(VariableResolver.retrieveLocalVariables(positionEl, parentblock));
 			if (ConfigurationProperties.getPropertyBool("consideryvarloops")) {
 				variables.addAll(getVarsInFor(currentElement));

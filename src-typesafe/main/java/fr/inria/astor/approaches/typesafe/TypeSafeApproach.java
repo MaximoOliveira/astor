@@ -28,7 +28,7 @@ public class TypeSafeApproach extends JGenProg {
                         "random-variable-replacement");
         }
 
-        ConfigurationProperties.setProperty(ExtensionPoints.TARGET_CODE_PROCESSOR.identifier, "expression");
+        ConfigurationProperties.setProperty(ExtensionPoints.TARGET_CODE_PROCESSOR.identifier, "typesafe-expression");
         ConfigurationProperties.setProperty(ExtensionPoints.OPERATORS_SPACE.identifier, "typesafe-space");
         setPropertyIfNotDefined(ExtensionPoints.INGREDIENT_SEARCH_STRATEGY.identifier, "typesafe-name-probability-based");
         ConfigurationProperties.setProperty(ExtensionPoints.SUSPICIOUS_NAVIGATION.identifier, "TYPESAFE_WEIGHT");
