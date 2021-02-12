@@ -1,0 +1,59 @@
+package fr.inria.astor.util;
+
+import spoon.reflect.code.BinaryOperatorKind;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class BinaryOperatorHelper {
+
+    List<BinaryOperatorKind> arithmeticOperators = new LinkedList<>();
+    List<BinaryOperatorKind> booleanOperators = new LinkedList<>();
+    List<BinaryOperatorKind> arithmeticOperatorsWhenReturnTypeIsBoolean = new LinkedList<>();
+
+    public BinaryOperatorHelper(){
+        initializeArithmeticOperators();
+        initializeBooleanOperators();
+        initializeArithmeticOperatorsWhenReturnTypeIsBoolean();
+    }
+
+    private void initializeArithmeticOperatorsWhenReturnTypeIsBoolean() {
+        arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.GE);
+        arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.GT);
+        arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.LE);
+        arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.NE);
+    }
+
+    private void initializeBooleanOperators() {
+        booleanOperators.add(BinaryOperatorKind.AND);
+        booleanOperators.add(BinaryOperatorKind.EQ);
+        booleanOperators.add(BinaryOperatorKind.NE);
+        booleanOperators.add(BinaryOperatorKind.OR);
+    }
+
+    private void initializeArithmeticOperators() {
+        arithmeticOperators.add(BinaryOperatorKind.PLUS);
+        arithmeticOperators.add(BinaryOperatorKind.MINUS);
+        arithmeticOperators.add(BinaryOperatorKind.MUL);
+        arithmeticOperators.add(BinaryOperatorKind.DIV);
+        arithmeticOperators.add(BinaryOperatorKind.MOD);
+        arithmeticOperators.add(BinaryOperatorKind.BITAND);
+        arithmeticOperators.add(BinaryOperatorKind.BITOR);
+        arithmeticOperators.add(BinaryOperatorKind.BITXOR);
+        arithmeticOperators.add(BinaryOperatorKind.SL);
+        arithmeticOperators.add(BinaryOperatorKind.SR);
+        arithmeticOperators.add(BinaryOperatorKind.USR);
+    }
+
+    public List<BinaryOperatorKind> getArithmeticOperators() {
+        return arithmeticOperators;
+    }
+
+    public List<BinaryOperatorKind> getBooleanOperators() {
+        return booleanOperators;
+    }
+
+    public List<BinaryOperatorKind> getArithmeticOperatorsWhenReturnTypeIsBoolean() {
+        return arithmeticOperatorsWhenReturnTypeIsBoolean;
+    }
+}
