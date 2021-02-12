@@ -184,7 +184,7 @@ public abstract class AbstractMain {
 						+ " It accepts customize scopes, which must implement from "
 						+ AstorCtIngredientPool.class.getCanonicalName());
 
-		options.addOption("skipfaultlocalization", false,
+		options.addOption("skipfaultlocalization", true,
 				"The fault localization is skipped and all statements are considered");
 
 		options.addOption("maxdate", true,

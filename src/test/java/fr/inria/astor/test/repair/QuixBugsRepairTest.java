@@ -61,13 +61,11 @@ public class QuixBugsRepairTest {
 		cs.command.put("-srctestfolder", "/src");
 		cs.command.put("-binjavafolder", "/bin");
 		cs.command.put("-bintestfolder", "/bin");
-		cs.command.put("-flthreshold", "0.0");
+		//cs.command.put("-flthreshold", "0.0");
 		cs.command.put("-loglevel", "INFO");
 		cs.command.put("-stopfirst", "TRUE");
-		cs.command.put("-parameters", "logtestexecution:TRUE:"
-				+ "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
-				+ GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
 		cs.command.put("-location", new File("./examples/quixbugscompiled/" + name).getAbsolutePath());
+		cs.command.put("-failing", "java_testcases.BREADTH_FIRST_SEARCH_TEST");
 
 		return cs;
 	}

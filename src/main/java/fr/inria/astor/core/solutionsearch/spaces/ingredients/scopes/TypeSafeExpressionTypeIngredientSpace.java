@@ -6,13 +6,18 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
-import fr.inria.astor.util.BinaryOperatorHelper;
+import fr.inria.astor.util.expand.BinaryOperatorHelper;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtBinaryOperatorImpl;
+import spoon.support.reflect.code.CtInvocationImpl;
+import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,13 +105,65 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
     }
 
     private List<CtCodeElement> expandIngredients(List<CtCodeElement> ingredients) {
-        Set<CtCodeElement> uniqueExpandedIngredients = new HashSet<>(ingredients);
-        List<CtCodeElement> binaryOperators = ingredients.stream().filter(i -> i.getClass().equals(CtBinaryOperatorImpl.class))
+        Set<CtCodeElement> uniqueExpandedIngredients = ingredients.stream().filter(e ->
+                !e.toString().equals("super()")).collect(Collectors.toSet());
+        List<CtCodeElement> binaryOperators = uniqueExpandedIngredients.stream().filter(i ->
+                i.getClass().equals(CtBinaryOperatorImpl.class))
                 .collect(Collectors.toList());
         Set<CtBinaryOperatorImpl> expandedBinaryOperators = expandBinaryOperators(binaryOperators);
+        List<CtCodeElement> invocations = uniqueExpandedIngredients.stream().filter(i -> i.getClass().equals(CtInvocationImpl.class))
+                .collect(Collectors.toList());
+        Set<CtInvocationImpl> expandedInvocationsWithExecutables = expandInvocationsWithExecutables(invocations);
         uniqueExpandedIngredients.addAll(expandedBinaryOperators);
+        uniqueExpandedIngredients.addAll(expandedInvocationsWithExecutables);
+        Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = expandInvocationsWithNegation(uniqueExpandedIngredients);
+        uniqueExpandedIngredients.addAll(expandedInvocationsWithNegation);
 
         return new ArrayList<>(uniqueExpandedIngredients);
+    }
+
+    private Set<CtUnaryOperatorImpl> expandInvocationsWithNegation(Set<CtCodeElement> invocations) {
+        Set<CtCodeElement> invocationsWithBooleanReturnType = invocations.stream()
+                .filter(ctInvocation -> ctInvocation instanceof CtInvocationImpl &&
+                        ((CtInvocationImpl) ctInvocation).getType().getSimpleName().equals("boolean"))
+                .collect(Collectors.toSet());
+        Set<CtUnaryOperatorImpl> negatedInvocations = new HashSet<>();
+        invocationsWithBooleanReturnType.forEach(invocation -> {
+            CtUnaryOperatorImpl ctUnaryOperator = new CtUnaryOperatorImpl();
+            CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
+            clonedInvocation.setParent(invocation.getParent());
+            ctUnaryOperator.setOperand(clonedInvocation);
+            ctUnaryOperator.setParent(invocation.getParent());
+            ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
+            negatedInvocations.add(ctUnaryOperator);
+        });
+
+        return negatedInvocations;
+    }
+
+    private Set<CtInvocationImpl> expandInvocationsWithExecutables(List<CtCodeElement> invocations) {
+        Set<CtCodeElement> set = new HashSet<>(invocations.size());
+        Set<CtCodeElement> invocationsWithUniqueTarget = invocations.stream().filter(invocation ->
+                ((CtInvocationImpl) invocation).getTarget() != null
+                        && set.add(((CtInvocationImpl<?>) invocation).getTarget())).collect(Collectors.toSet());
+
+        Set<CtInvocationImpl> expandedInvocations = new HashSet<>();
+        invocationsWithUniqueTarget.forEach(invocation -> {
+            Collection<CtExecutableReference<?>> executables = ((CtInvocationImpl) invocation).getTarget().getType().getAllExecutables();
+            executables.forEach(executable -> {
+                if (!executable.getParameters().isEmpty() && (!executable.getParameters().equals(((CtInvocationImpl<?>) invocation).getExecutable().getParameters())
+                        || !executable.getType().equals(((CtInvocationImpl<?>) invocation).getType())))
+                    return;
+                CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
+                clonedInvocation.setParent(invocation.getParent());
+                clonedInvocation.setExecutable(executable);
+                if (executable.getParameters().isEmpty())
+                    clonedInvocation.setArguments(executable.getActualTypeArguments());
+                expandedInvocations.add(clonedInvocation);
+            });
+        });
+
+        return expandedInvocations;
     }
 
     private Set<CtBinaryOperatorImpl> expandBinaryOperators(List<CtCodeElement> binaryOperators) {
@@ -127,7 +184,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                     synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
                     allOperators.add(synthesizedBinaryOperator);
                 });
-            } else if (type.getSimpleName().equals("int")){
+            } else if (type.getSimpleName().equals("int")) {
                 binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
                     CtBinaryOperatorImpl synthesizedBinaryOperator =
                             (CtBinaryOperatorImpl) MutationSupporter.factory
@@ -137,7 +194,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                     synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
                     allOperators.add(synthesizedBinaryOperator);
                 });
-            }else if(type.getSimpleName().equals("boolean")){
+            } else if (type.getSimpleName().equals("boolean")) {
                 binaryOperatorHelper.getBooleanOperators().forEach(ao -> {
                     CtBinaryOperatorImpl synthesizedBinaryOperator =
                             (CtBinaryOperatorImpl) MutationSupporter.factory

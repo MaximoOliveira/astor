@@ -127,25 +127,6 @@ public class TypeSafeTest {
     }
 
     @Test
-    public void testQuixBugsBitcount() throws Exception {
-        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bitcount");
-        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
-        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
-        command.command.put("-seed", "100");
-        command.command.put("-flthreshold", "0.1");
-        command.command.put("-maxtime", "60");
-        command.command.put("-maxgen", "100");
-        command.command.put("-population", "1");
-        command.command.put("-scope", scope.toString().toLowerCase());
-        command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
-        //command.command.put("-parameters", "disablelog:false");
-        command.command.put("-stopfirst", "true");
-
-        AstorMain main1 = new AstorMain();
-        main1.execute(command.flat());
-    }
-
-    @Test
     public void testTypeSafeM70() throws Exception {
         CommandSummary command = MathCommandsTests.getMath70Command();
 

@@ -15,7 +15,7 @@ public class TypeSafeApproach extends JGenProg {
 
     public TypeSafeApproach(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException {
         super(mutatorExecutor, projFacade);
-        // Default configuration of Cardumen:
+        // Default configuration of typesafe mutator:
         ConfigurationProperties.setProperty("cleantemplates", "true");
 
         if (!ConfigurationProperties.hasProperty(ExtensionPoints.INGREDIENT_TRANSFORM_STRATEGY.identifier)) {
@@ -38,9 +38,7 @@ public class TypeSafeApproach extends JGenProg {
     @Override
     protected void loadIngredientPool() throws JSAPException, Exception {
         List<TargetElementProcessor<?>> ingredientProcessors = this.getTargetElementProcessors();
-        TypeSafeExpressionTypeIngredientSpace ingredientspace = ((ConfigurationProperties.getPropertyBool("uniformreplacement"))
-                ? new TypeSafeExpressionClassTypeIngredientSpace(ingredientProcessors)
-                : new TypeSafeExpressionClassTypeIngredientSpace(ingredientProcessors));
+        TypeSafeExpressionTypeIngredientSpace ingredientspace = new TypeSafeExpressionClassTypeIngredientSpace(ingredientProcessors);
         String scope = ConfigurationProperties.getProperty(ExtensionPoints.INGREDIENT_STRATEGY_SCOPE.identifier);
         if (scope != null) {
             ingredientspace.scope = IngredientPoolScope.valueOf(scope.toUpperCase());

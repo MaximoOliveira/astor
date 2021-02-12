@@ -1,4 +1,4 @@
-package fr.inria.astor.util;
+package fr.inria.astor.util.expand;
 
 import spoon.reflect.code.BinaryOperatorKind;
 

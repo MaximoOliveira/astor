@@ -89,12 +89,12 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 				break;
 			}
 
-			if (this.nrGenerationWithoutModificatedVariant >= ConfigurationProperties
+			/*if (this.nrGenerationWithoutModificatedVariant >= ConfigurationProperties
 					.getPropertyInt("nomodificationconvergence")) {
 				log.error(String.format("Stopping main loop at %d generation", generationsExecuted));
 				this.outputStatus = AstorOutputStatus.CONVERGED;
 				break;
-			}
+			}*/
 		}
 
 	}
