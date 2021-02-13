@@ -60,4 +60,52 @@ public class QuixBugsTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
     }
+
+    @Test
+    public void testLEVENSHTEIN() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bitcount");
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-seed", "100");
+        command.command.put("-flthreshold", "0.1");
+        command.command.put("-maxtime", "60");
+        command.command.put("-maxgen", "500");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        //command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
+        //command.command.put("-parameters", "disablelog:false");
+        command.command.put("-parameters", "logtestexecution:TRUE:"
+                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
+                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
+        command.command.put("-stopfirst", "true");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+    }
+
+    @Test
+    public void testBUCKETSORT() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bucketsort");
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-seed", "100");
+        command.command.put("-flthreshold", "0.1");
+        command.command.put("-maxtime", "60");
+        command.command.put("-maxgen", "500");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        //command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
+        //command.command.put("-parameters", "disablelog:false");
+        command.command.put("-parameters", "logtestexecution:TRUE:"
+                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
+                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
+        command.command.put("-stopfirst", "true");
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1 ,engine.getSolutions().size());
+    }
 }

@@ -3,6 +3,7 @@ package fr.inria.astor.test.repair.approaches.typesafe;
 import fr.inria.astor.approaches.typesafe.TypeSafeApproach;
 import fr.inria.astor.core.manipulation.bytecode.compiler.SpoonClassCompiler;
 import fr.inria.astor.core.manipulation.bytecode.entities.CompilationResult;
+import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.TypeSafeExpressionTypeIngredientSpace;
 import fr.inria.astor.test.repair.QuixBugsRepairTest;
@@ -24,8 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TypeSafeTest {
 
@@ -142,7 +142,7 @@ public class TypeSafeTest {
         command.command.put("-parameters", "maxCombinationVariableLimit:true:disablelog:false");
         //command.command.put("-parameters", "disablelog:false");
         command.command.put("-maxVarCombination", "1000");
-        command.command.put("-stopfirst", "false");
+        command.command.put("-stopfirst", "true");
         command.command.put("-javacompliancelevel", "5");
 
         AstorMain main1 = new AstorMain();
@@ -158,6 +158,11 @@ public class TypeSafeTest {
         //assertTrue(typeSafeApproach.getSolutions().size() > 0);
         // In this test case we find the solution at generation 74
         //assertTrue(cardumen.getCurrentStat().getGeneralStats().get(Stats.GeneralStatEnum.NR_GENERATIONS).equals(74));
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1 ,engine.getSolutions().size());
     }
 
     @Test

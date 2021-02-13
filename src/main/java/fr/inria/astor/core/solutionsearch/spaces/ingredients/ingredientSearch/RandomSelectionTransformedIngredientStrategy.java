@@ -59,9 +59,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 	 * ingredient.
 	 * 
 	 * @param modificationPoint
-	 * @param targetStmt
 	 * @param operationType
-	 * @param elementsFromFixSpace
 	 * @return
 	 */
 	@Override
@@ -227,11 +225,6 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 			log.debug(String.format("\nAttempts In Transformed Ingredient  %d total %d", attempts,
 					ingredientsAfterTransformation.size()));
 
-			if (transformedIngredient.getCode().toString().equals(modificationPoint.getCodeElement().toString())) {
-				log.debug("Ingredient idem to buggy statement, discarting it.");
-				continue;
-			}
-
 			// we check if was applied
 			boolean alreadyApplied = alreadySelected(modificationPoint, transformedIngredient.getCode(), operator);
 
@@ -296,10 +289,7 @@ public class RandomSelectionTransformedIngredientStrategy extends IngredientSear
 
 	/**
 	 * Check if the ingredient was already used
-	 * 
-	 * @param id       program instance id.
-	 * @param fix
-	 * @param location
+	 *
 	 * @return
 	 */
 	protected boolean alreadySelected(ModificationPoint gen, CtElement fixElement, AstorOperator operator) {

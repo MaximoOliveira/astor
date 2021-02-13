@@ -52,6 +52,7 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.PotentialVariableDeclarationFunction;
+import spoon.support.reflect.code.CtLocalVariableImpl;
 
 /**
  * Variable manipulations: methods to analyze variables and scope
@@ -850,7 +851,6 @@ public class VariableResolver {
 			}
 
 		}
-
 		return variables;
 
 	}

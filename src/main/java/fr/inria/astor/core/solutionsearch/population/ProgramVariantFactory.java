@@ -245,10 +245,6 @@ public class ProgramVariantFactory {
         }
 
         List<CtVariable> contextOfPoint = null;
-        // We take the first element for getting the context (as the remaining
-        // have the same location, it's not necessary)
-
-        contextOfPoint = VariableResolver.searchVariablesInScope(ctSuspects.get(0));
 
         // From the suspicious CtElements, there are some of them we are
         // interested in.
@@ -263,11 +259,12 @@ public class ProgramVariantFactory {
                 .collect(Collectors.toList());
         // For each filtered element, we create a ModificationPoint.
         for (CtElement ctElement : filteredTypeByLine) {
+            List<CtVariable> contextOfGen = VariableResolver.searchVariablesInScope(ctElement);
             SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
             modifPoint.setSuspicious(suspiciousCode);
             modifPoint.setCtClass(ctclasspointed);
             modifPoint.setCodeElement(ctElement);
-            modifPoint.setContextOfModificationPoint(contextOfPoint);
+            modifPoint.setContextOfModificationPoint(contextOfGen);
             suspiciousModificationPoints.add(modifPoint);
             log.debug("--ModifPoint:" + ctElement.getClass().getSimpleName() + ", suspValue "
                     + suspiciousCode.getSuspiciousValue() + ", line " + ctElement.getPosition().getLine() + ", file "

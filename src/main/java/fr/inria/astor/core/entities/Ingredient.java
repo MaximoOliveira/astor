@@ -98,11 +98,8 @@ public class Ingredient {
 			return false;
 		Ingredient other = (Ingredient) obj;
 		if (ingredientCode == null) {
-			if (other.ingredientCode != null)
-				return false;
-		} else if (!ingredientCode.equals(other.ingredientCode))
-			return false;
-		return true;
+			return other.ingredientCode == null;
+		} else return ingredientCode.equals(other.ingredientCode);
 	}
 
 	public Map<String, Object> getMetadata() {

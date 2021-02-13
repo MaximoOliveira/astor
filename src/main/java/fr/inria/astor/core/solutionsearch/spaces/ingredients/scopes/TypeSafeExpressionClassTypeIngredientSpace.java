@@ -2,6 +2,7 @@ package fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.core.entities.Ingredient;
+import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
@@ -38,6 +39,8 @@ public class TypeSafeExpressionClassTypeIngredientSpace extends TypeSafeExpressi
         if(ingredientsKey == null) {
             ingredientsKey = new LinkedList<>();
         }
+        Ingredient ingredient = new Ingredient(MutationSupporter.clone(ctExpr));
+        ingredientsKey.add(ingredient);
         mkp.put(keyLocation, returnTypeExpression, ingredientsKey);
 
         return ingredientsKey;
