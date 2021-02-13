@@ -142,10 +142,14 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
             clonedInvocation.setParent(invocation.getParent());
             ctUnaryOperator.setOperand(clonedInvocation);
             ctUnaryOperator.setParent(invocation.getParent());
-            ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
             CtTypeReference booleanType = typeFactory.booleanPrimitiveType();
             ctUnaryOperator.setType(booleanType);
             ctUnaryOperator.setPosition(invocation.getPosition());
+            ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
+            // Weird case of spoon. Spoon adds parentheses when ctUnaryOperator's parent is same
+            String possibleUnaryWithoutParenthesis = ctUnaryOperator.toString().substring( 1, ctUnaryOperator.toString().length() - 1);
+            if(possibleUnaryWithoutParenthesis.equals(ctUnaryOperator.getParent().toString()))
+                ctUnaryOperator = (CtUnaryOperatorImpl) ctUnaryOperator.getParent();
             negatedInvocations.add(ctUnaryOperator);
         });
 
