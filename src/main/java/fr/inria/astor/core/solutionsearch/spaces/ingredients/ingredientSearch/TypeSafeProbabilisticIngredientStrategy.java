@@ -4,6 +4,8 @@ import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.ingredientbased.IngredientBasedEvolutionaryRepairApproachImpl;
+import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
@@ -14,21 +16,23 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.MapList;
 import fr.inria.astor.util.StringUtil;
+import fr.inria.astor.util.expand.BinaryOperatorHelper;
 import org.apache.log4j.Logger;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.factory.CodeFactory;
+import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
+import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStrategy {
@@ -44,6 +48,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     public MapList<String, Ingredient> exhaustTemplates = new MapList<>();
     List<String> elements2String = null;
     Map<String, Double> probs = null;
+    BinaryOperatorHelper binaryOperatorHelper = new BinaryOperatorHelper();
 
     public TypeSafeProbabilisticIngredientStrategy(IngredientPool space) {
         super(space);
@@ -185,14 +190,201 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
                 }).collect(Collectors.toList());
     }
 
+    private Set<CtBinaryOperatorImpl> getExpandedBinaryOpsInt(CtCodeElement codeElement) {
+        Set<CtBinaryOperatorImpl> set = new HashSet<>();
+        CodeFactory codeFactory = MutationSupporter.factory.Code();
+        binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
+            CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
+            ctBinaryOperator.setKind(ao);
+            ctBinaryOperator.setType(new TypeFactory().integerPrimitiveType());
+            CtVariableAccess leftLiteral = createVarFromLiteral(codeFactory.createLiteral(1), "varnname1");
+            CtVariableAccess rightLiteral = createVarFromLiteral(codeFactory.createLiteral(2), "varname2");
+            ctBinaryOperator.setLeftHandOperand(leftLiteral);
+            ctBinaryOperator.setRightHandOperand(rightLiteral);
+            ctBinaryOperator.setParent(codeElement.getParent());
+            set.add(ctBinaryOperator);
+        });
+        return set;
+    }
+
+    private Set<CtBinaryOperatorImpl> getExpandedBinaryOpsBoolean(CtCodeElement codeElement) {
+        Set<CtBinaryOperatorImpl> set = new HashSet<>();
+        CodeFactory codeFactory = MutationSupporter.factory.Code();
+        binaryOperatorHelper.getBooleanOperators().forEach(bo -> {
+            CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
+            ctBinaryOperator.setKind(bo);
+            ctBinaryOperator.setType(new TypeFactory().booleanPrimitiveType());
+            CtVariableAccess leftLiteral = createVarFromLiteral(codeFactory.createLiteral(1), "varnname1");
+            CtVariableAccess rightLiteral = createVarFromLiteral(codeFactory.createLiteral(2), "varname2");
+            ctBinaryOperator.setLeftHandOperand(leftLiteral);
+            ctBinaryOperator.setRightHandOperand(rightLiteral);
+            ctBinaryOperator.setParent(codeElement.getParent());
+            set.add(ctBinaryOperator);
+        });
+        return set;
+    }
+
+    private Set<Ingredient> createIngredients(CtCodeElement codeElement) {
+        TypeFactory typeFactory = new TypeFactory();
+        Set<CtBinaryOperatorImpl> expanded = new HashSet<>();
+        if (codeElement.getReferencedTypes().contains(typeFactory.booleanPrimitiveType()))
+            expanded = getExpandedBinaryOpsBoolean(codeElement);
+        else
+            expanded = getExpandedBinaryOpsInt(codeElement);
+        Set<Ingredient> ingredients = new HashSet<>();
+        expanded.forEach(ctBinaryOperator -> {
+            CtCodeElement templateElement = MutationSupporter.clone(ctBinaryOperator);
+            templateElement.setParent(codeElement.getParent());
+            formatIngredient(templateElement);
+            Ingredient templateIngredient = new Ingredient(templateElement);
+            ingredients.add(templateIngredient);
+        });
+        return ingredients;
+
+    }
+
+    private CtVariableAccess createVarFromLiteral(CtLiteral ctLiteral, String varnname) {
+        CtTypeReference type = ctLiteral.getType();
+        CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, varnname, ctLiteral);
+        return MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
+
+    }
+
+    private Set<CtUnaryOperatorImpl> expandInvocationsWithNegation(Set<CtCodeElement> invocations) {
+        TypeFactory typeFactory = new TypeFactory();
+        Set<CtCodeElement> invocationsWithBooleanReturnType = invocations.stream()
+                .filter(ctInvocation -> ctInvocation instanceof CtInvocationImpl &&
+                        ((CtInvocationImpl) ctInvocation).getType().getSimpleName().equals("boolean"))
+                .collect(Collectors.toSet());
+        Set<CtUnaryOperatorImpl> negatedInvocations = new HashSet<>();
+        invocationsWithBooleanReturnType.forEach(invocation -> {
+            CtUnaryOperatorImpl ctUnaryOperator = new CtUnaryOperatorImpl();
+            CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
+            clonedInvocation.setParent(invocation.getParent());
+            ctUnaryOperator.setOperand(clonedInvocation);
+            ctUnaryOperator.setParent(invocation.getParent());
+            CtTypeReference booleanType = typeFactory.booleanPrimitiveType();
+            ctUnaryOperator.setType(booleanType);
+            ctUnaryOperator.setPosition(invocation.getPosition());
+            ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
+            // Weird case of spoon. Spoon adds parentheses when ctUnaryOperator's parent is same
+            String possibleUnaryWithoutParenthesis = ctUnaryOperator.toString().substring(1, ctUnaryOperator.toString().length() - 1);
+            if (possibleUnaryWithoutParenthesis.equals(ctUnaryOperator.getParent().toString()))
+                ctUnaryOperator = (CtUnaryOperatorImpl) ctUnaryOperator.getParent();
+            negatedInvocations.add(ctUnaryOperator);
+        });
+
+        return negatedInvocations;
+    }
+
+    private Set<CtInvocationImpl> expandInvocationsWithExecutables(List<CtCodeElement> invocations) {
+        Set<CtCodeElement> set = new HashSet<>(invocations.size());
+        Set<CtCodeElement> invocationsWithUniqueTarget = invocations.stream().filter(invocation ->
+                ((CtInvocationImpl) invocation).getTarget() != null
+                        && set.add(((CtInvocationImpl<?>) invocation).getTarget())).collect(Collectors.toSet());
+
+        Set<CtInvocationImpl> expandedInvocations = new HashSet<>();
+        invocationsWithUniqueTarget.forEach(invocation -> {
+            Collection<CtExecutableReference<?>> executables = ((CtInvocationImpl) invocation).getTarget().getType().getAllExecutables();
+            executables.forEach(executable -> {
+                if (!executable.getParameters().isEmpty() && (!executable.getParameters().equals(((CtInvocationImpl<?>) invocation).getExecutable().getParameters())
+                        || !executable.getType().equals(((CtInvocationImpl<?>) invocation).getType())))
+                    return;
+                CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
+                clonedInvocation.setParent(invocation.getParent());
+                clonedInvocation.setExecutable(executable);
+                if (executable.getParameters().isEmpty())
+                    clonedInvocation.setArguments(executable.getActualTypeArguments());
+                expandedInvocations.add(clonedInvocation);
+            });
+        });
+
+        return expandedInvocations;
+    }
+
+    private Set<CtBinaryOperatorImpl> expandBinaryOperators(List<CtCodeElement> binaryOperators) {
+        Set<CtBinaryOperatorImpl> allOperators = new HashSet<>();
+        binaryOperators.forEach(element -> {
+            CtBinaryOperatorImpl binaryOperator = ((CtBinaryOperatorImpl) element);
+            CtExpression leftExpression = binaryOperator.getLeftHandOperand();
+            CtExpression rightExpression = binaryOperator.getRightHandOperand();
+            CtTypeReference type = leftExpression.getType();
+            CtTypeReference returnType = binaryOperator.getType();
+            if (returnType.getSimpleName().equals("boolean") && type.getSimpleName().equals("int")) {
+                binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(bo -> {
+                    CtBinaryOperatorImpl synthesizedBinaryOperator =
+                            (CtBinaryOperatorImpl) MutationSupporter.factory
+                                    .createBinaryOperator(leftExpression, rightExpression, bo);
+                    synthesizedBinaryOperator.setPosition(element.getPosition());
+                    synthesizedBinaryOperator.setParent(element.getParent());
+                    synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
+                    allOperators.add(synthesizedBinaryOperator);
+                });
+            } else if (type.getSimpleName().equals("int")) {
+                binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
+                    CtBinaryOperatorImpl synthesizedBinaryOperator =
+                            (CtBinaryOperatorImpl) MutationSupporter.factory
+                                    .createBinaryOperator(leftExpression, rightExpression, ao);
+                    synthesizedBinaryOperator.setPosition(element.getPosition());
+                    synthesizedBinaryOperator.setParent(element.getParent());
+                    synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
+                    allOperators.add(synthesizedBinaryOperator);
+                });
+            } else if (type.getSimpleName().equals("boolean")) {
+                binaryOperatorHelper.getBooleanOperators().forEach(ao -> {
+                    CtBinaryOperatorImpl synthesizedBinaryOperator =
+                            (CtBinaryOperatorImpl) MutationSupporter.factory
+                                    .createBinaryOperator(leftExpression, rightExpression, ao);
+                    synthesizedBinaryOperator.setPosition(element.getPosition());
+                    synthesizedBinaryOperator.setParent(element.getParent());
+                    synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
+                    allOperators.add(synthesizedBinaryOperator);
+                });
+            }
+        });
+        return allOperators;
+    }
+
+    //TODO FIX
+    private List<Ingredient> expandIngredients(List<CtCodeElement> ingredients) {
+        Set<CtCodeElement> uniqueExpandedIngredients = ingredients.stream().filter(e ->
+                !e.toString().equals("super()")).collect(Collectors.toSet());
+        List<CtCodeElement> binaryOperators = uniqueExpandedIngredients.stream().filter(i ->
+                i.getClass().equals(CtBinaryOperatorImpl.class))
+                .collect(Collectors.toList());
+        Set<CtBinaryOperatorImpl> expandedBinaryOperators = expandBinaryOperators(binaryOperators);
+        List<CtCodeElement> invocations = uniqueExpandedIngredients.stream().filter(i -> i.getClass().equals(CtInvocationImpl.class))
+                .collect(Collectors.toList());
+        Set<CtInvocationImpl> expandedInvocationsWithExecutables = expandInvocationsWithExecutables(invocations);
+        uniqueExpandedIngredients.addAll(expandedBinaryOperators);
+        uniqueExpandedIngredients.addAll(expandedInvocationsWithExecutables);
+        Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = expandInvocationsWithNegation(uniqueExpandedIngredients);
+        Set<CtCodeElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
+        set.addAll(uniqueExpandedIngredients);
+        set.addAll(expandedInvocationsWithNegation);
+        List<CtCodeElement> wihtoutNulls = set.stream().filter(i -> !i.toString().equals("null")).collect(Collectors.toList());
+        return wihtoutNulls.stream().map(Ingredient::new).collect(Collectors.toList());
+    }
+
     public List<Ingredient> getNotExhaustedBaseElements(ModificationPoint modificationPoint,
                                                         AstorOperator operationType) {
 
-        List<Ingredient> elements = getNotExhaustedBaseElements2(modificationPoint, operationType);
 
+        List<Ingredient> elements = getNotExhaustedBaseElements2(modificationPoint, operationType);
         if (elements == null) {
             return null;
         }
+        // TODO REMOVE DUPLICATES
+        TypeFactory typeFactory = new TypeFactory();
+        List<CtCodeElement> codeElementsOfIngredients = elements.stream().map(i -> (CtCodeElement) i.getCode()).collect(Collectors.toList());
+        elements = expandIngredients(codeElementsOfIngredients);
+
+        if (modificationPoint.getCodeElement().getReferencedTypes().contains(typeFactory.booleanPrimitiveType()) ||
+                modificationPoint.getCodeElement().getReferencedTypes().contains(typeFactory.integerPrimitiveType())) {
+            elements.addAll(createIngredients((CtCodeElement) modificationPoint.getCodeElement()));
+        }
+
+
         if (ConfigurationProperties.getPropertyBool("frequenttemplate")) {
             log.debug("Defining template order for " + modificationPoint);
             TypeSafeExpressionTypeIngredientSpace space = (TypeSafeExpressionTypeIngredientSpace) this.getIngredientSpace();
@@ -217,7 +409,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     }
 
     public List<Ingredient> getNotExhaustedBaseElements2(ModificationPoint modificationPoint,
-                                                        AstorOperator operationType) {
+                                                         AstorOperator operationType) {
 
         String type = null;
         if (operationType instanceof ReplaceOp) {
@@ -456,6 +648,46 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
                 return false;
             }
         }
+    }
+
+    public void formatIngredient(CtElement ingredientCtElement) {
+
+        // log.debug("\n------" + ingredientCtElement);
+        List<CtVariableAccess> varAccessCollected = VariableResolver.collectVariableAccess(ingredientCtElement, true);
+        Map<String, String> varMappings = new HashMap<>();
+        int nrvar = 0;
+        for (int i = 0; i < varAccessCollected.size(); i++) {
+            CtVariableAccess var = varAccessCollected.get(i);
+
+            if (VariableResolver.isStatic(var.getVariable())) {
+                continue;
+            }
+
+            String abstractName = "";
+            if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
+                String currentTypeName = var.getVariable().getType().getSimpleName();
+                if (currentTypeName.contains("?")) {
+                    // Any change in case of ?
+                    abstractName = var.getVariable().getSimpleName();
+                } else {
+                    abstractName = "_" + currentTypeName + "_" + nrvar;
+                }
+                varMappings.put(var.getVariable().getSimpleName(), abstractName);
+                nrvar++;
+            } else {
+                abstractName = varMappings.get(var.getVariable().getSimpleName());
+            }
+
+            var.getVariable().setSimpleName(abstractName);
+            // workaround: Problems with var Shadowing
+            var.getFactory().getEnvironment().setNoClasspath(true);
+            if (var instanceof CtFieldAccess) {
+                CtFieldAccess fieldAccess = (CtFieldAccess) var;
+                fieldAccess.getVariable().setDeclaringType(null);
+            }
+
+        }
+
     }
 
 

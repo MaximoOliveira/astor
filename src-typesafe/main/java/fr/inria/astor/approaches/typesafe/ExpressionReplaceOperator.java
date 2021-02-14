@@ -27,13 +27,16 @@ public class ExpressionReplaceOperator extends ReplaceOp {
         CtExpression elementToModify = (CtExpression) opInstance.getOriginal();
         CtExpression elementOriginalCloned = (CtExpression) MutationSupporter.clone(elementToModify);
 
-        CtElement elFixIngredient = opInstance.getModified();
-        List<CtTypeReference> exceptions = needsTryCatch(elFixIngredient, elementToModify);
+        CtCodeElement elFixIngredient = (CtCodeElement) opInstance.getModified();
+        //List<CtTypeReference> exceptions = needsTryCatch(elFixIngredient, elementToModify);
+        List<CtTypeReference> exceptions = new ArrayList<>(); //TODO UNCOMMENT THIS
+
 
         // we transform the Spoon model
 
         try {
             opInstance.getModificationPoint().getCodeElement().replace(elFixIngredient);
+
             if (!exceptions.isEmpty()) {
                 addTryCatchIfNeeded(opInstance, exceptions);
             }
@@ -43,9 +46,6 @@ public class ExpressionReplaceOperator extends ReplaceOp {
             opInstance.setExceptionAtApplied(e);
             return false;
         }
-
-        // I save the original instance
-        opInstance.setOriginal(elementOriginalCloned);
         // Finally, we update the modification point (i.e., Astor
         // Representation)
         opInstance.getModificationPoint().setCodeElement(elFixIngredient);
