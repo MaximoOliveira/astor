@@ -7,30 +7,30 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.expand.BinaryOperatorHelper;
-import spoon.reflect.code.*;
-import spoon.reflect.cu.SourcePosition;
+import fr.inria.astor.util.expand.Expander;
+import spoon.reflect.code.CtCodeElement;
+import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.factory.CodeFactory;
-import spoon.reflect.factory.TypeFactory;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.support.reflect.code.CtBinaryOperatorImpl;
-import spoon.support.reflect.code.CtInvocationImpl;
 import spoon.support.reflect.code.CtLiteralImpl;
-import spoon.support.reflect.code.CtUnaryOperatorImpl;
-import spoon.support.reflect.cu.position.SourcePositionImpl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredientSpace {
 
     BinaryOperatorHelper binaryOperatorHelper;
+    Expander expander;
+    protected Map<String, String> keysLocation = new HashMap<>();
 
     public TypeSafeExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
         super(processors);
         binaryOperatorHelper = new BinaryOperatorHelper();
+        expander = new Expander();
     }
 
     @Override
@@ -41,6 +41,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         for (CtType<?> classToProcess : affected) {
 
             List<CtCodeElement> ingredients = this.ingredientProcessor.createFixSpace(classToProcess);
+            ingredients = expander.expandIngredients(ingredients);
             TargetElementProcessor.mustClone = true;
 
             for (CtCodeElement originalIngredient : ingredients) {
@@ -48,8 +49,6 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                 String keyLocation = mapKey(originalIngredient);
                 if (originalIngredient instanceof CtExpression) {
                     CtExpression ctExpr = (CtExpression) originalIngredient;
-                    // String typeExpression =
-                    // ctExpr.getClass().getSimpleName();
 
                     if (ctExpr.getType() == null) {
                         continue;
@@ -59,6 +58,14 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                     if (ConfigurationProperties.getPropertyBool("cleantemplates")) {
                         MutationSupporter.getEnvironment().setNoClasspath(true);// ?
 
+                        if (ctExpr instanceof CtLiteral) {
+                            CtTypeReference type = ((CtLiteral<?>) ctExpr).getType();
+                            CtLiteralImpl ctLiteral = (CtLiteralImpl) ctExpr;
+                            CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, "varname", ctLiteral);
+                            CtElement parent = ctExpr.getParent();
+                            ctExpr = MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
+                            ctExpr.setParent(parent);
+                        }
                         CtCodeElement templateElement = MutationSupporter.clone(ctExpr);
                         formatIngredient(templateElement);
 
@@ -99,10 +106,8 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         log.info(String.format("Ingredient search space info : number keys %d , number values %d ", mkp.keySet().size(),
                 nrIng));
 
-        // this.linkTemplateElements.forEach((e,v) ->
-        // log.debug(String.format("k: %s v: %d ", e,v.size())));
-
     }
+
 
     @Override
     public List<Ingredient> getIngredients(CtElement element) {
@@ -119,6 +124,18 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         return null;
     }
 
+    @Override
+    protected String mapKey(CtElement element) {
+
+        String key = calculateLocation(element);
+
+        if (key == null)
+            return null;
+
+        this.keysLocation.putIfAbsent(element.toString(), null);
+
+        return key;
+    }
+
 
 }
-

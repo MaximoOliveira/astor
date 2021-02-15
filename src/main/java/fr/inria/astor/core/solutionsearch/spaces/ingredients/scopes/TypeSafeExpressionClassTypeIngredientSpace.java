@@ -6,8 +6,6 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
-import spoon.support.reflect.code.CtInvocationImpl;
-import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +34,7 @@ public class TypeSafeExpressionClassTypeIngredientSpace extends TypeSafeExpressi
         String returnTypeExpression = (ctExpr.getType() != null) ? ctExpr.getType().toString() : "null";
 
         List<Ingredient> ingredientsKey = (List<Ingredient>) mkp.get(keyLocation, returnTypeExpression);
-        if(ingredientsKey == null) {
+        if (ingredientsKey == null) {
             ingredientsKey = new LinkedList<>();
         }
         Ingredient ingredient = new Ingredient(MutationSupporter.clone(ctExpr));
@@ -45,6 +43,7 @@ public class TypeSafeExpressionClassTypeIngredientSpace extends TypeSafeExpressi
 
         return ingredientsKey;
     }
+
 
     @Override
     public List<Ingredient> getIngredients(CtElement element, String type) {

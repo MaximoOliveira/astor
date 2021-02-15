@@ -57,11 +57,10 @@ public class QuixBugsRepairTest {
 		cs.command.put("-mode", "jgenprog");
 		cs.command.put("-id", name);
 		cs.command.put("-population", "1");
-		cs.command.put("-srcjavafolder", "/src/java_programs");
-		cs.command.put("-srctestfolder", "/src/java_testcases");
+		cs.command.put("-srcjavafolder", "/src");
+		cs.command.put("-srctestfolder", "/src");
 		cs.command.put("-binjavafolder", "/bin");
 		cs.command.put("-bintestfolder", "/bin");
-		//cs.command.put("-flthreshold", "0.0");
 		cs.command.put("-loglevel", "INFO");
 		cs.command.put("-stopfirst", "TRUE");
 		cs.command.put("-location", new File("./examples/quixbugscompiled/" + name).getAbsolutePath());
