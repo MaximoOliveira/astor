@@ -17,6 +17,7 @@ import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.MapList;
 import fr.inria.astor.util.StringUtil;
 import fr.inria.astor.util.expand.BinaryOperatorHelper;
+import fr.inria.astor.util.expand.Expander;
 import org.apache.log4j.Logger;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
@@ -49,6 +50,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     List<String> elements2String = null;
     Map<String, Double> probs = null;
     BinaryOperatorHelper binaryOperatorHelper = new BinaryOperatorHelper();
+    Expander expander = new Expander();
 
     public TypeSafeProbabilisticIngredientStrategy(IngredientPool space) {
         super(space);
@@ -131,6 +133,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     }
 
     private List<Ingredient> getValidFixIngredients(List<Ingredient> baseElements, CtType<?> classOfMP) {
+        if (baseElements == null) return null;
         List<Ingredient> ctInvocations = baseElements.stream()
                 .filter(ingredient -> ingredient.getCode() instanceof CtInvocationImpl).collect(Collectors.toList());
         List<Ingredient> privateFieldsFromForeignClass = getIngredientsWithPrivateFieldsAndFromForeignClass(ctInvocations, classOfMP);
@@ -462,46 +465,6 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
                 return false;
             }
         }
-    }
-
-    public void formatIngredient(CtElement ingredientCtElement) {
-
-        // log.debug("\n------" + ingredientCtElement);
-        List<CtVariableAccess> varAccessCollected = VariableResolver.collectVariableAccess(ingredientCtElement, true);
-        Map<String, String> varMappings = new HashMap<>();
-        int nrvar = 0;
-        for (int i = 0; i < varAccessCollected.size(); i++) {
-            CtVariableAccess var = varAccessCollected.get(i);
-
-            if (VariableResolver.isStatic(var.getVariable())) {
-                continue;
-            }
-
-            String abstractName = "";
-            if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
-                String currentTypeName = var.getVariable().getType().getSimpleName();
-                if (currentTypeName.contains("?")) {
-                    // Any change in case of ?
-                    abstractName = var.getVariable().getSimpleName();
-                } else {
-                    abstractName = "_" + currentTypeName + "_" + nrvar;
-                }
-                varMappings.put(var.getVariable().getSimpleName(), abstractName);
-                nrvar++;
-            } else {
-                abstractName = varMappings.get(var.getVariable().getSimpleName());
-            }
-
-            var.getVariable().setSimpleName(abstractName);
-            // workaround: Problems with var Shadowing
-            var.getFactory().getEnvironment().setNoClasspath(true);
-            if (var instanceof CtFieldAccess) {
-                CtFieldAccess fieldAccess = (CtFieldAccess) var;
-                fieldAccess.getVariable().setDeclaringType(null);
-            }
-
-        }
-
     }
 
 

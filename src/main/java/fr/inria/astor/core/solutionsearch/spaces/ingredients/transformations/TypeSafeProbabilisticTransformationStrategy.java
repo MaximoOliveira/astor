@@ -83,6 +83,7 @@ public class TypeSafeProbabilisticTransformationStrategy extends CacheTransforma
 
                         DynamicIngredient ding = new DynamicIngredient(varCombinationForIngredient, mapping,
                                 codeElementToModifyFromBase);
+                        // if i remove this the program breaks for some reason
                         ding.getCode();
                         transformedIngredientsResults.add(ding);
                     }

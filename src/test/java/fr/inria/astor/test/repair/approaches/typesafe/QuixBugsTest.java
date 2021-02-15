@@ -42,6 +42,7 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
+    @Ignore // taking to much time with this setup
     @Test
     public void testLEVENSHTEIN() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("levenshtein");
@@ -203,7 +204,7 @@ public class QuixBugsTest {
         command.command.put("-seed", "400");
         command.command.put("-flthreshold", "0.1");
         command.command.put("-maxtime", "60");
-        command.command.put("-maxgen", "10");
+        command.command.put("-maxgen", "1000");
         command.command.put("-population", "1");
         command.command.put("-scope", scope.toString().toLowerCase());
         command.command.put("-stopfirst", "true");
@@ -306,7 +307,7 @@ public class QuixBugsTest {
         command.command.put("-seed", "123");
         command.command.put("-flthreshold", "0.1");
         command.command.put("-maxtime", "60");
-        command.command.put("-maxgen", "100");
+        command.command.put("-maxgen", "3000");
         command.command.put("-population", "1");
         command.command.put("-scope", scope.toString().toLowerCase());
         command.command.put("-stopfirst", "true");
@@ -329,7 +330,7 @@ public class QuixBugsTest {
         command.command.put("-seed", "123");
         command.command.put("-flthreshold", "0.5");
         command.command.put("-maxtime", "60");
-        command.command.put("-maxgen", "100");
+        command.command.put("-maxgen", "3000");
         command.command.put("-population", "1");
         command.command.put("-parameters", "maxCombinationVariableLimit:true:maxVarCombination:1000");
         command.command.put("-scope", scope.toString().toLowerCase());
@@ -375,7 +376,32 @@ public class QuixBugsTest {
         command.command.put("-seed", "123");
         command.command.put("-flthreshold", "0.1");
         command.command.put("-maxtime", "60");
-        command.command.put("-maxgen", "310");
+        command.command.put("-maxgen", "1000");
+        command.command.put("-population", "1");
+        command.command.put("-parameters", "maxCombinationVariableLimit:true:maxVarCombination:1000");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        command.command.put("-stopfirst", "true");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
+    @Ignore
+    @Test
+    public void testGCD() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("gcd");
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-seed", "123");
+        command.command.put("-flthreshold", "0.1");
+        command.command.put("-maxtime", "60");
+        command.command.put("-maxgen", "5000");
         command.command.put("-population", "1");
         command.command.put("-parameters", "maxCombinationVariableLimit:true:maxVarCombination:1000");
         command.command.put("-scope", scope.toString().toLowerCase());

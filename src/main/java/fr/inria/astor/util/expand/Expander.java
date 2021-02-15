@@ -1,7 +1,9 @@
 package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import spoon.reflect.code.*;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
@@ -11,14 +13,19 @@ import spoon.support.reflect.code.CtInvocationImpl;
 import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Expander {
 
-    BinaryOperatorHelper binaryOperatorHelper;
+    private BinaryOperatorHelper binaryOperatorHelper;
+    private TypeFactory typeFactory;
+    CodeFactory codeFactory;
 
-    public Expander(){
+    public Expander() {
         binaryOperatorHelper = new BinaryOperatorHelper();
+        typeFactory = new TypeFactory();
+        codeFactory = MutationSupporter.factory.Code();
     }
 
 
@@ -62,8 +69,8 @@ public class Expander {
             ctUnaryOperator.setPosition(invocation.getPosition());
             ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
             // Weird case of spoon. Spoon adds parentheses when ctUnaryOperator's parent is same
-            String possibleUnaryWithoutParenthesis = ctUnaryOperator.toString().substring( 1, ctUnaryOperator.toString().length() - 1);
-            if(possibleUnaryWithoutParenthesis.equals(ctUnaryOperator.getParent().toString()))
+            String possibleUnaryWithoutParenthesis = ctUnaryOperator.toString().substring(1, ctUnaryOperator.toString().length() - 1);
+            if (possibleUnaryWithoutParenthesis.equals(ctUnaryOperator.getParent().toString()))
                 ctUnaryOperator = (CtUnaryOperatorImpl) ctUnaryOperator.getParent();
             negatedInvocations.add(ctUnaryOperator);
         });
@@ -78,22 +85,80 @@ public class Expander {
                         && set.add(((CtInvocationImpl<?>) invocation).getTarget())).collect(Collectors.toSet());
 
         Set<CtInvocationImpl> expandedInvocations = new HashSet<>();
+        Set<CtInvocationImpl> expandedInvocationsWithNoParams = getExpandedInvocationsWithNoParams(invocationsWithUniqueTarget);
+        Set<CtInvocationImpl> expandedInvocationsWithParams = getExpandedInvocationsWithParams(invocationsWithUniqueTarget);
+        expandedInvocations.addAll(expandedInvocationsWithNoParams);
+        expandedInvocations.addAll(expandedInvocationsWithParams);
+
+
+        return expandedInvocations;
+    }
+
+
+    private Set<CtInvocationImpl> getExpandedInvocationsWithParams(Set<CtCodeElement> invocationsWithUniqueTarget) {
+        Set<CtInvocationImpl> expandedInvocationsWithParams = new HashSet<>();
         invocationsWithUniqueTarget.forEach(invocation -> {
-            Collection<CtExecutableReference<?>> executables = ((CtInvocationImpl) invocation).getTarget().getType().getAllExecutables();
+            Collection<CtExecutableReference<?>> executables = getExecutablesWithParams((CtInvocationImpl) MutationSupporter.clone(invocation));
             executables.forEach(executable -> {
-                if (!executable.getParameters().isEmpty() && (!executable.getParameters().equals(((CtInvocationImpl<?>) invocation).getExecutable().getParameters())
-                        || !executable.getType().equals(((CtInvocationImpl<?>) invocation).getType())))
-                    return;
+                CtInvocationImpl clonedInvocation = (CtInvocationImpl) MutationSupporter.clone(invocation);
+                clonedInvocation.setExecutable(executable);
+                List<CtExpression<?>> templatedArgumentsFromInvocation = getTemplatedArgumentsFromInvocation(clonedInvocation);
+                clonedInvocation.setArguments(templatedArgumentsFromInvocation);
+                formatIngredient(clonedInvocation);
+                expandedInvocationsWithParams.add(clonedInvocation);
+            });
+        });
+        return expandedInvocationsWithParams;
+    }
+
+    /** Given a invocation myClass.method(a, b) return a List of expressions in the form ["var_0" , "var_1"]
+     *  Where each expression has the same type of the original invocation's corresponding argument
+     *  If in this case both arguments of the invocation are of type double then restun a list of expressions with
+     *  type double
+     *
+     * @param invocation the invocation from where we create a template
+     * @return the templated invocation
+     */
+    private List<CtExpression<?>> getTemplatedArgumentsFromInvocation(CtInvocationImpl invocation) {
+        List<CtExpression<?>> invocationArguments = invocation.getArguments();
+        List<CtExpression<?>> templateArguments = new LinkedList<>();
+        AtomicInteger nrVars = new AtomicInteger(0); // we want a different var name for each argument
+        invocationArguments.forEach(arg -> {
+            String varNumber =  String.valueOf(nrVars.getAndIncrement());
+            CtExpression<?> clonedArg = (CtExpression<?>) MutationSupporter.clone(arg);
+            CtVariableAccess newTemplate = createVarFromExpression(clonedArg, "var_" + varNumber);
+            newTemplate.setParent(clonedArg.getParent());
+            templateArguments.add(newTemplate);
+        });
+
+        return templateArguments;
+    }
+
+    private Set<CtInvocationImpl> getExpandedInvocationsWithNoParams(Set<CtCodeElement> invocationsWithUniqueTarget) {
+        Set<CtInvocationImpl> expandedInvocationsWithNoParams = new HashSet<>();
+        invocationsWithUniqueTarget.forEach(invocation -> {
+            Collection<CtExecutableReference<?>> executables = getExecutablesWithNoParams((CtInvocationImpl) invocation);
+            executables.forEach(executable -> {
                 CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
                 clonedInvocation.setParent(invocation.getParent());
                 clonedInvocation.setExecutable(executable);
                 if (executable.getParameters().isEmpty())
                     clonedInvocation.setArguments(executable.getActualTypeArguments());
-                expandedInvocations.add(clonedInvocation);
+                expandedInvocationsWithNoParams.add(clonedInvocation);
             });
         });
 
-        return expandedInvocations;
+        return expandedInvocationsWithNoParams;
+    }
+
+    private Set<CtExecutableReference<?>> getExecutablesWithNoParams(CtInvocationImpl ctInvocation) {
+        return ctInvocation.getExecutable().getDeclaringType().getAllExecutables()
+                .stream().filter(executable -> executable.getParameters().isEmpty()).collect(Collectors.toSet());
+    }
+
+    private Set<CtExecutableReference<?>> getExecutablesWithParams(CtInvocationImpl ctInvocation) {
+        return ctInvocation.getExecutable().getDeclaringType().getAllExecutables()
+                .stream().filter(executable -> !executable.getParameters().isEmpty()).collect(Collectors.toSet());
     }
 
     private Set<CtBinaryOperatorImpl> expandBinaryOperators(List<CtCodeElement> binaryOperators) {
@@ -142,13 +207,13 @@ public class Expander {
     private Set<CtBinaryOperatorImpl> createBinaryOpsInt(CtCodeElement codeElement) {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
-        CodeFactory codeFactory = MutationSupporter.factory.Code();
+
         binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
             CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
             ctBinaryOperator.setKind(ao);
             ctBinaryOperator.setType(new TypeFactory().integerPrimitiveType());
-            CtVariableAccess leftLiteral = createVarFromLiteral(codeFactory.createLiteral(1), "varnname1");
-            CtVariableAccess rightLiteral = createVarFromLiteral(codeFactory.createLiteral(2), "varname2");
+            CtVariableAccess leftLiteral = createVarFromExpression(codeFactory.createLiteral(1), "varnname1");
+            CtVariableAccess rightLiteral = createVarFromExpression(codeFactory.createLiteral(2), "varname2");
             ctBinaryOperator.setLeftHandOperand(leftLiteral);
             ctBinaryOperator.setRightHandOperand(rightLiteral);
             ctBinaryOperator.setParent(clonedElement.getParent());
@@ -158,10 +223,49 @@ public class Expander {
         return set;
     }
 
-    private CtVariableAccess createVarFromLiteral(CtLiteral ctLiteral, String varnname) {
-        CtTypeReference type = ctLiteral.getType();
-        CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, varnname, ctLiteral);
+    private CtVariableAccess createVarFromExpression(CtExpression ctExpression, String varnname) {
+        CtTypeReference type = ctExpression.getType();
+        CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, varnname, ctExpression);
         return MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
+
+    }
+
+    public void formatIngredient(CtElement ingredientCtElement) {
+
+        List<CtVariableAccess> varAccessCollected = VariableResolver.collectVariableAccess(ingredientCtElement, true);
+        Map<String, String> varMappings = new HashMap<>();
+        int nrvar = 0;
+        for (int i = 0; i < varAccessCollected.size(); i++) {
+            CtVariableAccess var = varAccessCollected.get(i);
+
+            if (VariableResolver.isStatic(var.getVariable())) {
+                continue;
+            }
+
+            String abstractName = "";
+            if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
+                String currentTypeName = var.getVariable().getType().getSimpleName();
+                if (currentTypeName.contains("?")) {
+                    // Any change in case of ?
+                    abstractName = var.getVariable().getSimpleName();
+                } else {
+                    abstractName = "_" + currentTypeName + "_" + nrvar;
+                }
+                varMappings.put(var.getVariable().getSimpleName(), abstractName);
+                nrvar++;
+            } else {
+                abstractName = varMappings.get(var.getVariable().getSimpleName());
+            }
+
+            var.getVariable().setSimpleName(abstractName);
+            // workaround: Problems with var Shadowing
+            var.getFactory().getEnvironment().setNoClasspath(true);
+            if (var instanceof CtFieldAccess) {
+                CtFieldAccess fieldAccess = (CtFieldAccess) var;
+                fieldAccess.getVariable().setDeclaringType(null);
+            }
+
+        }
 
     }
 }

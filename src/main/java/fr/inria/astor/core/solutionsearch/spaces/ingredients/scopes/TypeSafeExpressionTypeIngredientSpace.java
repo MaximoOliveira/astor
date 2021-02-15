@@ -67,7 +67,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                             ctExpr.setParent(parent);
                         }
                         CtCodeElement templateElement = MutationSupporter.clone(ctExpr);
-                        formatIngredient(templateElement);
+                        expander.formatIngredient(templateElement);
 
                         Ingredient templateIngredient = new Ingredient(templateElement);
 
