@@ -8,6 +8,7 @@ import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.expand.BinaryOperatorHelper;
 import fr.inria.astor.util.expand.Expander;
+import fr.inria.astor.util.expand.InvocationExpanderHelper;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
@@ -25,6 +26,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
 
     BinaryOperatorHelper binaryOperatorHelper;
     Expander expander;
+    InvocationExpanderHelper invocationExpanderHelper = new InvocationExpanderHelper();
     protected Map<String, String> keysLocation = new HashMap<>();
 
     public TypeSafeExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
@@ -57,17 +59,12 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
 
                     if (ConfigurationProperties.getPropertyBool("cleantemplates")) {
                         MutationSupporter.getEnvironment().setNoClasspath(true);// ?
-
                         if (ctExpr instanceof CtLiteral) {
-                            CtTypeReference type = ((CtLiteral<?>) ctExpr).getType();
-                            CtLiteralImpl ctLiteral = (CtLiteralImpl) ctExpr;
-                            CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, "varname", ctLiteral);
                             CtElement parent = ctExpr.getParent();
-                            ctExpr = MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
                             ctExpr.setParent(parent);
                         }
                         CtCodeElement templateElement = MutationSupporter.clone(ctExpr);
-                        expander.formatIngredient(templateElement);
+                        invocationExpanderHelper.formatIngredient(templateElement);
 
                         Ingredient templateIngredient = new Ingredient(templateElement);
 

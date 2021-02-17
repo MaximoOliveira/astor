@@ -1,12 +1,13 @@
 package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtInvocationImpl;
 import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,37 @@ public class InvocationExpander {
         return invocationsWithBooleanReturnType.stream()
                 .map(invocation -> invocationExpanderHelper.createNegatedInvocation(invocation)).collect(Collectors.toSet());
     }
+
+    /** Given a set of invocations, create all possible invocations with executables that are extended by any class
+     *  from which target's type inherits. For instance:
+     *  If we have an invocation: myObject.method() then:
+     *      the target of this invocation is: myObject
+     *  If myObject if of type A and class A only extends Object
+     *  then create invocation with executables that exist in class A and class Object
+     *  Example of some invocations created:
+     *      myClass.clone()
+     *      myClass.wait(long, int)
+     *      etc...
+     *
+     * @param invocations .
+     * @return .
+     */
+    public Set<CtInvocationImpl> createInvocationsWithAllPossibleExecutables(Set<CtInvocationImpl> invocations) {
+        Set<CtCodeElement> set = new HashSet<>(invocations.size());
+        Set<CtInvocationImpl> invocationsWithUniqueTarget = invocations.stream().filter(invocation ->
+                invocation.getTarget() != null
+                        && set.add((invocation).getTarget())).collect(Collectors.toSet());
+
+        Set<CtInvocationImpl> expandedInvocations = new HashSet<>();
+        Set<CtInvocationImpl> expandedInvocationsWithNoParams = invocationExpanderHelper.createInvocationsWithNoArgExecutables(invocationsWithUniqueTarget);
+        Set<CtInvocationImpl> expandedInvocationsWithParams = invocationExpanderHelper.createInvocationsWithArgExecutables(invocationsWithUniqueTarget);
+        expandedInvocations.addAll(expandedInvocationsWithNoParams);
+        expandedInvocations.addAll(expandedInvocationsWithParams);
+
+
+        return expandedInvocations;
+    }
+
 
 
 }

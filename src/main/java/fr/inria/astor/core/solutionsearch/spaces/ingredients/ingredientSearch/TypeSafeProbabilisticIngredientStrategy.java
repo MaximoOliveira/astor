@@ -49,8 +49,6 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     public MapList<String, Ingredient> exhaustTemplates = new MapList<>();
     List<String> elements2String = null;
     Map<String, Double> probs = null;
-    BinaryOperatorHelper binaryOperatorHelper = new BinaryOperatorHelper();
-    Expander expander = new Expander();
 
     public TypeSafeProbabilisticIngredientStrategy(IngredientPool space) {
         super(space);
