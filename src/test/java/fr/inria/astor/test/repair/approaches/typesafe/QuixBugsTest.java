@@ -392,7 +392,6 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore
     @Test
     public void testGCD() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("gcd");
@@ -403,7 +402,6 @@ public class QuixBugsTest {
         command.command.put("-maxtime", "60");
         command.command.put("-maxgen", "5000");
         command.command.put("-population", "1");
-        command.command.put("-parameters", "maxCombinationVariableLimit:true:maxVarCombination:1000");
         command.command.put("-scope", scope.toString().toLowerCase());
         command.command.put("-stopfirst", "true");
 

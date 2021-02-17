@@ -2,6 +2,7 @@ package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
+import org.paukov.combinatorics3.Generator;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.CodeFactory;
@@ -18,17 +19,20 @@ import java.util.stream.Collectors;
 
 public class Expander {
 
-    private BinaryOperatorHelper binaryOperatorHelper;
+    private final BinaryOperatorHelper binaryOperatorHelper;
     private TypeFactory typeFactory;
-    CodeFactory codeFactory;
+    private final CodeFactory codeFactory;
+    private final InvocationExpander invocationExpander;
 
     public Expander() {
         binaryOperatorHelper = new BinaryOperatorHelper();
         typeFactory = new TypeFactory();
         codeFactory = MutationSupporter.factory.Code();
+        invocationExpander = new InvocationExpander();
     }
 
 
+    // TODO refactor this as well
     public List<CtCodeElement> expandIngredients(List<CtCodeElement> ingredients) {
         Set<CtCodeElement> uniqueExpandedIngredients = ingredients.stream().filter(e ->
                 !e.toString().equals("super()")).collect(Collectors.toSet());
@@ -36,53 +40,29 @@ public class Expander {
                 i.getClass().equals(CtBinaryOperatorImpl.class))
                 .collect(Collectors.toList());
         Set<CtBinaryOperatorImpl> expandedBinaryOperators = expandBinaryOperators(binaryOperators);
-        List<CtCodeElement> invocations = uniqueExpandedIngredients.stream().filter(i -> i.getClass().equals(CtInvocationImpl.class))
-                .collect(Collectors.toList());
+        Set<CtInvocationImpl> invocations = uniqueExpandedIngredients.stream().filter(i -> i instanceof CtInvocationImpl)
+                .map(i -> (CtInvocationImpl) i)
+                .collect(Collectors.toSet());
         Set<CtInvocationImpl> expandedInvocationsWithExecutables = expandInvocationsWithExecutables(invocations);
         uniqueExpandedIngredients.addAll(expandedBinaryOperators);
         uniqueExpandedIngredients.addAll(expandedInvocationsWithExecutables);
-        Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = expandInvocationsWithNegation(uniqueExpandedIngredients);
+        Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = invocationExpander.expandInvocationsWithNegation(invocations);
         CtCodeElement codeElement = uniqueExpandedIngredients.stream().findFirst().get();
         Set<CtBinaryOperatorImpl> binaryOpsInt = createBinaryOpsInt(codeElement);
+        Set<Set<CtInvocationImpl>> permutatedInvocations = invocationExpander.createAllPermutationsFromInvocations(invocations);
         Set<CtCodeElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
         set.addAll(uniqueExpandedIngredients);
         set.addAll(expandedInvocationsWithNegation);
         set.addAll(binaryOpsInt);
+        set.addAll(permutatedInvocations.stream().flatMap(Set::stream).collect(Collectors.toSet()));
         return set.stream().filter(i -> !i.toString().equals("null")).collect(Collectors.toList());
     }
 
-    private Set<CtUnaryOperatorImpl> expandInvocationsWithNegation(Set<CtCodeElement> invocations) {
-        TypeFactory typeFactory = new TypeFactory();
-        Set<CtCodeElement> invocationsWithBooleanReturnType = invocations.stream()
-                .filter(ctInvocation -> ctInvocation instanceof CtInvocationImpl &&
-                        ((CtInvocationImpl) ctInvocation).getType().getSimpleName().equals("boolean"))
-                .collect(Collectors.toSet());
-        Set<CtUnaryOperatorImpl> negatedInvocations = new HashSet<>();
-        invocationsWithBooleanReturnType.forEach(invocation -> {
-            CtUnaryOperatorImpl ctUnaryOperator = new CtUnaryOperatorImpl();
-            CtInvocationImpl clonedInvocation = (CtInvocationImpl) ((CtInvocationImpl) invocation).clone();
-            clonedInvocation.setParent(invocation.getParent());
-            ctUnaryOperator.setOperand(clonedInvocation);
-            ctUnaryOperator.setParent(invocation.getParent());
-            CtTypeReference booleanType = typeFactory.booleanPrimitiveType();
-            ctUnaryOperator.setType(booleanType);
-            ctUnaryOperator.setPosition(invocation.getPosition());
-            ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
-            // Weird case of spoon. Spoon adds parentheses when ctUnaryOperator's parent is same
-            String possibleUnaryWithoutParenthesis = ctUnaryOperator.toString().substring(1, ctUnaryOperator.toString().length() - 1);
-            if (possibleUnaryWithoutParenthesis.equals(ctUnaryOperator.getParent().toString()))
-                ctUnaryOperator = (CtUnaryOperatorImpl) ctUnaryOperator.getParent();
-            negatedInvocations.add(ctUnaryOperator);
-        });
-
-        return negatedInvocations;
-    }
-
-    private Set<CtInvocationImpl> expandInvocationsWithExecutables(List<CtCodeElement> invocations) {
+    private Set<CtInvocationImpl> expandInvocationsWithExecutables(Set<CtInvocationImpl> invocations) {
         Set<CtCodeElement> set = new HashSet<>(invocations.size());
         Set<CtCodeElement> invocationsWithUniqueTarget = invocations.stream().filter(invocation ->
-                ((CtInvocationImpl) invocation).getTarget() != null
-                        && set.add(((CtInvocationImpl<?>) invocation).getTarget())).collect(Collectors.toSet());
+                invocation.getTarget() != null
+                        && set.add((invocation).getTarget())).collect(Collectors.toSet());
 
         Set<CtInvocationImpl> expandedInvocations = new HashSet<>();
         Set<CtInvocationImpl> expandedInvocationsWithNoParams = getExpandedInvocationsWithNoParams(invocationsWithUniqueTarget);
@@ -111,10 +91,11 @@ public class Expander {
         return expandedInvocationsWithParams;
     }
 
-    /** Given a invocation myClass.method(a, b) return a List of expressions in the form ["var_0" , "var_1"]
-     *  Where each expression has the same type of the original invocation's corresponding argument
-     *  If in this case both arguments of the invocation are of type double then restun a list of expressions with
-     *  type double
+    /**
+     * Given a invocation myClass.method(a, b) return a List of expressions in the form ["var_0" , "var_1"]
+     * Where each expression has the same type of the original invocation's corresponding argument
+     * If in this case both arguments of the invocation are of type double then restun a list of expressions with
+     * type double
      *
      * @param invocation the invocation from where we create a template
      * @return the templated invocation
@@ -124,7 +105,7 @@ public class Expander {
         List<CtExpression<?>> templateArguments = new LinkedList<>();
         AtomicInteger nrVars = new AtomicInteger(0); // we want a different var name for each argument
         invocationArguments.forEach(arg -> {
-            String varNumber =  String.valueOf(nrVars.getAndIncrement());
+            String varNumber = String.valueOf(nrVars.getAndIncrement());
             CtExpression<?> clonedArg = (CtExpression<?>) MutationSupporter.clone(arg);
             CtVariableAccess newTemplate = createVarFromExpression(clonedArg, "var_" + varNumber);
             newTemplate.setParent(clonedArg.getParent());
@@ -161,6 +142,7 @@ public class Expander {
                 .stream().filter(executable -> !executable.getParameters().isEmpty()).collect(Collectors.toSet());
     }
 
+    //TODO REFACTOR THIS INTO SEVERAL METHODS
     private Set<CtBinaryOperatorImpl> expandBinaryOperators(List<CtCodeElement> binaryOperators) {
         Set<CtBinaryOperatorImpl> allOperators = new HashSet<>();
         binaryOperators.forEach(element -> {

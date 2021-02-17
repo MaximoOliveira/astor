@@ -146,6 +146,12 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.dpaukov</groupId>
+			<artifactId>combinatoricslib3</artifactId>
+			<version>3.3.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<repositories>
@@ -190,6 +196,11 @@
 			<name>Maven Repository for Spoon Artifac Snapshot</name>
 			<url>http://maven.inria.fr/artifactory/spoon-public-snapshot/</url>
 			<snapshots />
+		</repository>
+
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 
