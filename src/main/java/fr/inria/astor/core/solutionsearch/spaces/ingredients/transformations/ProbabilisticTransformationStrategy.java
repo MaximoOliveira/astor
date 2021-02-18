@@ -25,7 +25,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtVariable;
 
 /**
- * 
+ *
  * @author Matias Martinez
  *
  */
@@ -120,7 +120,7 @@ public class ProbabilisticTransformationStrategy extends CacheTransformationStra
 
 	/**
 	 * Returns a list of var combinations, sorted by probabilities.
-	 * 
+	 *
 	 * @param mappedVars
 	 * @param mpoint
 	 * @param baseIngredient
@@ -148,7 +148,7 @@ public class ProbabilisticTransformationStrategy extends CacheTransformationStra
 			MapCounter gramCounterSizeGlobal = this.ngramManager.getNgglobal().ngrams[sizeCombination];
 
 			if (gramCounterSize == null) { // Ingredient size bigger than all
-											// statements from the class
+				// statements from the class
 
 				String ingredientClass = baseIngredient.getCode().getParent(CtType.class).getQualifiedName();
 				if (mpointClass.equals(ingredientClass)) {

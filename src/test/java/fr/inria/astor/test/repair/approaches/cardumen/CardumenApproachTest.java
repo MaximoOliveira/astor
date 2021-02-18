@@ -55,7 +55,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtVariable;
 
 /**
- * 
+ *
  * @author Matias Martinez
  *
  */
@@ -1067,11 +1067,11 @@ public class CardumenApproachTest extends BaseEvolutionaryTest {
 			assertNotNull(ins3i);
 			log.debug("After: " + Stats.currentStat.getIngredientsStats().combinationByIngredientSize);
 			int remainingSize = ingredientsAfterTransformation3Size - i + 1;// +1
-																			// due
-																			// i
-																			// starts
-																			// in
-																			// 1
+			// due
+			// i
+			// starts
+			// in
+			// 1
 			assertTrue(" " + i, (long) Stats.currentStat.getIngredientsStats().combinationByIngredientSize
 					.get((long) (remainingSize)) >= 2);
 			if (Stats.currentStat.getIngredientsStats().combinationByIngredientSize.containsKey((long) 0)) {
@@ -1143,7 +1143,7 @@ public class CardumenApproachTest extends BaseEvolutionaryTest {
 		IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
 
 		int maxModPoints = 7;// Let's say 7, the number of MP over this
-								// configuration is 12.
+		// configuration is 12.
 
 		command.command.put("-mode", ExecutionMode.custom.name());
 		command.command.put("-flthreshold", "0.1");
