@@ -12,7 +12,8 @@ public class TypeSafeExpressionIngredientSpaceProcessor extends TargetElementPro
     @Override
     public void process(CtExpression element) {
 
-        if (element instanceof CtAssignment || element instanceof CtNewArray || element instanceof CtTypeAccess)
+        if (element instanceof CtAssignment || element instanceof CtNewArray || element instanceof CtTypeAccess
+                || element instanceof CtVariableWrite || element instanceof CtArrayWrite)
             return;
         if (element.getType() != null)
             this.add(element);

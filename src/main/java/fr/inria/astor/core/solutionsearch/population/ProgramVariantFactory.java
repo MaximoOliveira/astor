@@ -26,6 +26,7 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.visitor.filter.PotentialVariableDeclarationFunction;
 
 /**
  * Creates the initial population of program variants
@@ -184,7 +185,8 @@ public class ProgramVariantFactory {
             int maxModPoints = ConfigurationProperties.getPropertyInt("maxmodificationpoints");
 
             for (CtElement suspiciousElement : extractedElements) {
-                List<CtVariable> contextOfGen = VariableResolver.searchVariablesInScope(suspiciousElement);
+                List<CtVariable> contextOfGen = suspiciousElement.map(new PotentialVariableDeclarationFunction()).list();
+                contextOfGen = contextOfGen.stream().distinct().collect(Collectors.toList());
 
                 SuspiciousModificationPoint point = new SuspiciousModificationPoint();
                 point.setSuspicious(new SuspiciousCode(ctclasspointed.getQualifiedName(), "",
@@ -259,7 +261,8 @@ public class ProgramVariantFactory {
                 .collect(Collectors.toList());
         // For each filtered element, we create a ModificationPoint.
         for (CtElement ctElement : filteredTypeByLine) {
-            List<CtVariable> contextOfGen = VariableResolver.searchVariablesInScope(ctElement);
+            List<CtVariable> contextOfGen = ctElement.map(new PotentialVariableDeclarationFunction()).list();
+            contextOfGen = contextOfGen.stream().distinct().collect(Collectors.toList());
             SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
             modifPoint.setSuspicious(suspiciousCode);
             modifPoint.setCtClass(ctclasspointed);
