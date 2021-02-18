@@ -48,7 +48,9 @@ public class QuixBugsRepairTest {
 	public static CommandSummary getQuixBugsCommand(String name) {
 
 		CommandSummary cs = new CommandSummary();
-		String dep = new File("./examples/libs/junit-4.4.jar").getAbsolutePath();
+		//same as in Repair them all
+		String dep = new File("./lib/junit-4.11.jar").getAbsolutePath() + File.pathSeparator
+				+ new File("./lib/hamcrest-core-1.3.jar").getAbsolutePath();
 		cs.command.put("-javacompliancelevel", "8");
 		cs.command.put("-seed", "1");
 		cs.command.put("-package", "java_programs");

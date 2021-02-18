@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class TypeSafeProbabilisticTransformationStrategy extends CacheTransformationStrategy
         implements IngredientTransformationStrategy {
 
-    protected Logger logger = Logger.getLogger(ProbabilisticTransformationStrategy.class.getName());
+    protected Logger logger = Logger.getLogger(TypeSafeProbabilisticTransformationStrategy.class.getName());
     protected NGramManager ngramManager = new NGramManager(null, null);
 
     public TypeSafeProbabilisticTransformationStrategy() {

@@ -10,6 +10,7 @@ import fr.inria.main.evolution.AstorMain;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -21,15 +22,12 @@ public class QuixBugsTest {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bitcount");
         IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
         command.command.put("-mode", ExecutionMode.TYPESAFE.name());
-        command.command.put("-seed", "100");
+        command.command.put("-seed", "123");
         command.command.put("-flthreshold", "0.1");
         command.command.put("-maxtime", "60");
         command.command.put("-maxgen", "500");
         command.command.put("-population", "1");
         command.command.put("-scope", scope.toString().toLowerCase());
-        command.command.put("-parameters", "logtestexecution:TRUE:"
-                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
-                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
         command.command.put("-stopfirst", "true");
 
         AstorMain main1 = new AstorMain();
@@ -401,6 +399,29 @@ public class QuixBugsTest {
         command.command.put("-flthreshold", "0.1");
         command.command.put("-maxtime", "60");
         command.command.put("-maxgen", "5000");
+        command.command.put("-population", "1");
+        command.command.put("-scope", scope.toString().toLowerCase());
+        command.command.put("-stopfirst", "true");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
+    @Test
+    public void testFLATTEN_rta_error() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("flatten");
+        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
+        command.command.put("-mode", ExecutionMode.TYPESAFE.name());
+        command.command.put("-seed", "0");
+        command.command.put("-flthreshold", "0.1");
+        command.command.put("-maxtime", "60");
+        command.command.put("-maxgen", "1000");
         command.command.put("-population", "1");
         command.command.put("-scope", scope.toString().toLowerCase());
         command.command.put("-stopfirst", "true");
