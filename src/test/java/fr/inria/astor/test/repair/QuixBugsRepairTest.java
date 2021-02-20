@@ -64,6 +64,7 @@ public class QuixBugsRepairTest {
 		cs.command.put("-binjavafolder", "/bin");
 		cs.command.put("-bintestfolder", "/bin");
 		cs.command.put("-loglevel", "INFO");
+		cs.command.put("-flthreshold", "0.1");
 		cs.command.put("-stopfirst", "TRUE");
 		cs.command.put("-location", new File("./examples/quixbugscompiled/" + name).getAbsolutePath());
 

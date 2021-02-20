@@ -12,11 +12,8 @@ import fr.inria.astor.util.expand.InvocationExpanderHelper;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.reference.CtTypeReference;
-import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.HashMap;
 import java.util.List;

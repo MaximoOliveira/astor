@@ -11,7 +11,6 @@ import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtBinaryOperatorImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
-import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +42,7 @@ public class Expander {
         Set<CtInvocationImpl> expandedInvocationsWithExecutables = invocationExpander.createInvocationsWithAllPossibleExecutables(invocations);
         uniqueExpandedIngredients.addAll(expandedBinaryOperators);
         uniqueExpandedIngredients.addAll(expandedInvocationsWithExecutables);
-        Set<CtUnaryOperatorImpl> expandedInvocationsWithNegation = invocationExpander.expandInvocationsWithNegation(invocations);
+        Set<CtExpression> expandedInvocationsWithNegation = invocationExpander.expandInvocationsWithNegation(invocations);
         CtCodeElement codeElement = uniqueExpandedIngredients.stream().findFirst().get();
         Set<CtBinaryOperatorImpl> binaryOpsInt = createBinaryOpsInt(codeElement);
         Set<Set<CtInvocationImpl>> permutatedInvocations = invocationExpander.createAllPermutationsFromInvocations(invocations);

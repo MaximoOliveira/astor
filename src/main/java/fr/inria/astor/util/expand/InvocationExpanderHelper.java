@@ -2,11 +2,17 @@ package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
+import one.util.streamex.StreamEx;
 import org.paukov.combinatorics3.Generator;
-import spoon.reflect.code.*;
+import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldAccess;
+import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtInvocationImpl;
 import spoon.support.reflect.code.CtUnaryOperatorImpl;
@@ -21,6 +27,8 @@ import java.util.stream.Collectors;
 public class InvocationExpanderHelper {
 
     TypeFactory typeFactory = MutationSupporter.factory.Type();
+    CodeFactory codeFactory = MutationSupporter.factory.Code();
+
 
     /**
      * Given an invocation, create all possible permutations (of the arguments) from that invocations
@@ -71,7 +79,7 @@ public class InvocationExpanderHelper {
      * @param invocation .
      * @return .
      */
-    public CtUnaryOperatorImpl createNegatedInvocation(CtInvocationImpl invocation) {
+    public CtExpression createNegatedInvocation(CtInvocationImpl invocation) {
         CtUnaryOperatorImpl ctUnaryOperator = new CtUnaryOperatorImpl();
         CtInvocationImpl clonedInvocation = (CtInvocationImpl) MutationSupporter.clone(invocation);
         clonedInvocation.setParent(invocation.getParent());
@@ -86,10 +94,13 @@ public class InvocationExpanderHelper {
         return ctUnaryOperator;
     }
 
-    public Set<CtInvocationImpl> createInvocationsWithArgExecutables(Set<CtInvocationImpl> invocationsWithUniqueTarget) {
-        return invocationsWithUniqueTarget.stream().map(this::createInvocationsWithInheritedExecutables)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet());
+    public Set<CtInvocationImpl> createInvocationsWithArgExecutables(Set<CtInvocationImpl> uniqueInvocations) {
+        Set<CtInvocationImpl> expandedInvocationsWithArgs =
+                uniqueInvocations.stream().map(this::createInvocationsWithInheritedExecutables)
+                        .flatMap(Set::stream)
+                        .collect(Collectors.toSet());
+        //remove invocations that are duplicate (by String)
+        return StreamEx.of(expandedInvocationsWithArgs).distinct(CtInvocationImpl::toString).collect(Collectors.toSet());
     }
 
     public Set<CtInvocationImpl> createInvocationsWithNoArgExecutables(Set<CtInvocationImpl> invocationsWithUniqueTarget) {
@@ -120,6 +131,7 @@ public class InvocationExpanderHelper {
     }
 
     /**
+     * TODO FIX THIS
      * Given a invocation myClass.method(a, b) return a List of expressions in the form ["var_0" , "var_1"]
      * Where each expression has the same type of the original invocation's corresponding argument
      * If in this case both arguments of the invocation are of type double then return a list of expressions of
@@ -129,26 +141,19 @@ public class InvocationExpanderHelper {
      * @return the templated invocation
      */
     private List<CtExpression<?>> getTemplatedArgumentsFromInvocation(CtInvocationImpl invocation) {
-        List<CtExpression<?>> invocationArguments = invocation.getArguments();
+        List<CtTypeReference<?>> parameters = invocation.getExecutable().getParameters();
         List<CtExpression<?>> templateArguments = new LinkedList<>();
         AtomicInteger nrVars = new AtomicInteger(0); // we want a different var name for each argument
-        invocationArguments.forEach(arg -> {
+        parameters.forEach(param -> {
             String varNumber = String.valueOf(nrVars.getAndIncrement());
-            CtExpression<?> clonedArg = (CtExpression<?>) MutationSupporter.clone(arg);
-            CtVariableAccess newTemplate = createVarFromExpression(clonedArg, "var_" + varNumber);
-            newTemplate.setParent(clonedArg.getParent());
+            CtVariableAccess newTemplate = createVarFromType(param, "var_" + varNumber);
+            newTemplate.setParent(invocation.getParent());
             templateArguments.add(newTemplate);
         });
 
         return templateArguments;
     }
 
-    public CtVariableAccess createVarFromExpression(CtExpression ctExpression, String varnname) {
-        CtTypeReference type = ctExpression.getType();
-        CtLocalVariable local = MutationSupporter.factory.Code().createLocalVariable(type, varnname, ctExpression);
-        return MutationSupporter.factory.Code().createVariableRead(local.getReference(), false);
-
-    }
 
     private Set<CtInvocationImpl> createInvocationsWithInheritedExecutables(CtInvocationImpl invocation) {
         Collection<CtExecutableReference<?>> executables = getExecutablesWithArgs((CtInvocationImpl) MutationSupporter.clone(invocation));
@@ -204,6 +209,11 @@ public class InvocationExpanderHelper {
 
         }
 
+    }
+
+    public CtVariableAccess createVarFromType(CtTypeReference ctTypeReference, String name) {
+        CtLocalVariableReference varReference = codeFactory.createLocalVariableReference(ctTypeReference, name);
+        return codeFactory.createVariableRead(varReference, false);
     }
 
 
