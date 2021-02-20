@@ -2,7 +2,6 @@ package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
-import one.util.streamex.StreamEx;
 import org.paukov.combinatorics3.Generator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
@@ -11,7 +10,6 @@ import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.TypeFactory;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtInvocationImpl;
@@ -50,7 +48,7 @@ public class InvocationExpanderHelper {
     }
 
     /**
-     * Given a list of arguments in the form (a , b ,c) then return all possible permutations:
+     * Given a list of arguments in the form (a , b ,c) , return all possible permutations:
      * (a, c ,b)
      * (b, a ,c)
      * (b, c ,a)
@@ -94,44 +92,7 @@ public class InvocationExpanderHelper {
         return ctUnaryOperator;
     }
 
-    public Set<CtInvocationImpl> createInvocationsWithArgExecutables(Set<CtInvocationImpl> uniqueInvocations) {
-        Set<CtInvocationImpl> expandedInvocationsWithArgs =
-                uniqueInvocations.stream().map(this::createInvocationsWithInheritedExecutables)
-                        .flatMap(Set::stream)
-                        .collect(Collectors.toSet());
-        //remove invocations that are duplicate (by String)
-        return StreamEx.of(expandedInvocationsWithArgs).distinct(CtInvocationImpl::toString).collect(Collectors.toSet());
-    }
-
-    public Set<CtInvocationImpl> createInvocationsWithNoArgExecutables(Set<CtInvocationImpl> invocationsWithUniqueTarget) {
-        Set<CtInvocationImpl> expandedInvocationsWithNoParams = new HashSet<>();
-        invocationsWithUniqueTarget.forEach(invocation -> {
-            Collection<CtExecutableReference<?>> executables = getExecutablesWithNoArgs(invocation);
-            executables.forEach(executable -> {
-                CtInvocationImpl clonedInvocation = (CtInvocationImpl) MutationSupporter.clone(invocation);
-                clonedInvocation.setParent(invocation.getParent());
-                clonedInvocation.setExecutable(executable);
-                if (executable.getParameters().isEmpty())
-                    clonedInvocation.setArguments(executable.getActualTypeArguments());
-                expandedInvocationsWithNoParams.add(clonedInvocation);
-            });
-        });
-
-        return expandedInvocationsWithNoParams;
-    }
-
-    private Set<CtExecutableReference<?>> getExecutablesWithNoArgs(CtInvocationImpl ctInvocation) {
-        return ctInvocation.getExecutable().getDeclaringType().getAllExecutables()
-                .stream().filter(executable -> executable.getParameters().isEmpty()).collect(Collectors.toSet());
-    }
-
-    private Set<CtExecutableReference<?>> getExecutablesWithArgs(CtInvocationImpl ctInvocation) {
-        return ctInvocation.getExecutable().getDeclaringType().getAllExecutables()
-                .stream().filter(executable -> !executable.getParameters().isEmpty()).collect(Collectors.toSet());
-    }
-
     /**
-     * TODO FIX THIS
      * Given a invocation myClass.method(a, b) return a List of expressions in the form ["var_0" , "var_1"]
      * Where each expression has the same type of the original invocation's corresponding argument
      * If in this case both arguments of the invocation are of type double then return a list of expressions of
@@ -140,7 +101,7 @@ public class InvocationExpanderHelper {
      * @param invocation the invocation from where we create a template
      * @return the templated invocation
      */
-    private List<CtExpression<?>> getTemplatedArgumentsFromInvocation(CtInvocationImpl invocation) {
+    public List<CtExpression<?>> getTemplatedArgumentsFromInvocation(CtInvocationImpl invocation) {
         List<CtTypeReference<?>> parameters = invocation.getExecutable().getParameters();
         List<CtExpression<?>> templateArguments = new LinkedList<>();
         AtomicInteger nrVars = new AtomicInteger(0); // we want a different var name for each argument
@@ -152,23 +113,6 @@ public class InvocationExpanderHelper {
         });
 
         return templateArguments;
-    }
-
-
-    private Set<CtInvocationImpl> createInvocationsWithInheritedExecutables(CtInvocationImpl invocation) {
-        Collection<CtExecutableReference<?>> executables = getExecutablesWithArgs((CtInvocationImpl) MutationSupporter.clone(invocation));
-        return executables.stream().map(executable ->
-                createInvocationWithExecutable((CtInvocationImpl) MutationSupporter.clone(invocation), executable))
-                .collect(Collectors.toSet());
-    }
-
-    private CtInvocationImpl createInvocationWithExecutable(CtInvocationImpl invocation, CtExecutableReference<?> executable) {
-        CtInvocationImpl clonedInvocation = (CtInvocationImpl) MutationSupporter.clone(invocation);
-        clonedInvocation.setExecutable(executable);
-        List<CtExpression<?>> templatedArgumentsFromInvocation = getTemplatedArgumentsFromInvocation(clonedInvocation);
-        clonedInvocation.setArguments(templatedArgumentsFromInvocation);
-        formatIngredient(clonedInvocation);
-        return clonedInvocation;
     }
 
     // taken from already existing code in Astor. author probably Matias or Martin
@@ -184,7 +128,7 @@ public class InvocationExpanderHelper {
                 continue;
             }
 
-            String abstractName = "";
+            String abstractName;
             if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
                 String currentTypeName = var.getVariable().getType().getSimpleName();
                 if (currentTypeName.contains("?")) {

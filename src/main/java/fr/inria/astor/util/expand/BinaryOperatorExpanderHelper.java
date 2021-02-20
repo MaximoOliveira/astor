@@ -5,13 +5,13 @@ import spoon.reflect.code.BinaryOperatorKind;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BinaryOperatorHelper {
+public class BinaryOperatorExpanderHelper {
 
     List<BinaryOperatorKind> arithmeticOperators = new LinkedList<>();
     List<BinaryOperatorKind> booleanOperators = new LinkedList<>();
     List<BinaryOperatorKind> arithmeticOperatorsWhenReturnTypeIsBoolean = new LinkedList<>();
 
-    public BinaryOperatorHelper(){
+    public BinaryOperatorExpanderHelper() {
         initializeArithmeticOperators();
         initializeBooleanOperators();
         initializeArithmeticOperatorsWhenReturnTypeIsBoolean();

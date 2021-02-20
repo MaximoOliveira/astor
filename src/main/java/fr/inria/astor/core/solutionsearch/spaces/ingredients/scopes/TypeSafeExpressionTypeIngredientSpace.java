@@ -6,7 +6,7 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
-import fr.inria.astor.util.expand.BinaryOperatorHelper;
+import fr.inria.astor.util.expand.BinaryOperatorExpanderHelper;
 import fr.inria.astor.util.expand.Expander;
 import fr.inria.astor.util.expand.InvocationExpanderHelper;
 import spoon.reflect.code.CtCodeElement;
@@ -21,14 +21,14 @@ import java.util.Map;
 
 public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredientSpace {
 
-    BinaryOperatorHelper binaryOperatorHelper;
+    BinaryOperatorExpanderHelper binaryOperatorHelper;
     Expander expander;
     InvocationExpanderHelper invocationExpanderHelper = new InvocationExpanderHelper();
     protected Map<String, String> keysLocation = new HashMap<>();
 
     public TypeSafeExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
         super(processors);
-        binaryOperatorHelper = new BinaryOperatorHelper();
+        binaryOperatorHelper = new BinaryOperatorExpanderHelper();
         expander = new Expander();
     }
 
@@ -40,7 +40,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         for (CtType<?> classToProcess : affected) {
 
             List<CtCodeElement> ingredients = this.ingredientProcessor.createFixSpace(classToProcess);
-            ingredients = expander.expandIngredients(ingredients);
+            ingredients = expander.expandIngredientSpace(ingredients, classToProcess);
             TargetElementProcessor.mustClone = true;
 
             for (CtCodeElement originalIngredient : ingredients) {
