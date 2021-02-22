@@ -320,6 +320,7 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
+    @Ignore
     @Test
     public void testSieve() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("sieve");

@@ -27,10 +27,12 @@ public class BinaryOperatorExpander {
                 .collect(Collectors.toList());
         Set<CtBinaryOperatorImpl> expandedBinaryOperators = expandBinaryOperators(binaryOperators);
         CtCodeElement codeElement = ingredientSpace.stream().findFirst().get();
-        Set<CtBinaryOperatorImpl> binaryOpsInt = createBinaryOpsInt(codeElement);
+        Set<CtBinaryOperatorImpl> binaryOpsReturnTypeInt = createBinaryOpsReturnTypeInt(codeElement);
+        Set<CtBinaryOperatorImpl> binaryOpsBooleanReturnTypeBoolean = createBinaryOpsReturnTypeBoolean(codeElement);
         Set<CtBinaryOperatorImpl> allBinaryOperators = new HashSet<>();
         allBinaryOperators.addAll(expandedBinaryOperators);
-        allBinaryOperators.addAll(binaryOpsInt);
+        allBinaryOperators.addAll(binaryOpsReturnTypeInt);
+        allBinaryOperators.addAll(binaryOpsBooleanReturnTypeBoolean);
         return allBinaryOperators;
     }
 
@@ -77,7 +79,7 @@ public class BinaryOperatorExpander {
         return allOperators;
     }
 
-    public Set<CtBinaryOperatorImpl> createBinaryOpsInt(CtCodeElement codeElement) {
+    public Set<CtBinaryOperatorImpl> createBinaryOpsReturnTypeInt(CtCodeElement codeElement) {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
 
@@ -85,6 +87,25 @@ public class BinaryOperatorExpander {
             CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
             ctBinaryOperator.setKind(ao);
             ctBinaryOperator.setType(new TypeFactory().integerPrimitiveType());
+            CtVariableAccess leftLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess rightLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
+            ctBinaryOperator.setLeftHandOperand(leftLiteral);
+            ctBinaryOperator.setRightHandOperand(rightLiteral);
+            ctBinaryOperator.setParent(clonedElement.getParent());
+            ctBinaryOperator.setPosition(clonedElement.getPosition());
+            set.add(ctBinaryOperator);
+        });
+        return set;
+    }
+
+    private Set<CtBinaryOperatorImpl> createBinaryOpsReturnTypeBoolean(CtCodeElement codeElement) {
+        Set<CtBinaryOperatorImpl> set = new HashSet<>();
+        CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
+
+        binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(bo -> {
+            CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
+            ctBinaryOperator.setKind(bo);
+            ctBinaryOperator.setType(new TypeFactory().booleanPrimitiveType());
             CtVariableAccess leftLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
             CtVariableAccess rightLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
             ctBinaryOperator.setLeftHandOperand(leftLiteral);

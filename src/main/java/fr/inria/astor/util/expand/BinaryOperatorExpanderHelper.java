@@ -22,6 +22,7 @@ public class BinaryOperatorExpanderHelper {
         arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.GT);
         arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.LE);
         arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.NE);
+        arithmeticOperatorsWhenReturnTypeIsBoolean.add(BinaryOperatorKind.EQ);
     }
 
     private void initializeBooleanOperators() {
