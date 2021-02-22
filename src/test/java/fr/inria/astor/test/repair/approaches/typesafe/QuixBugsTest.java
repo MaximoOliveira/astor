@@ -57,7 +57,6 @@ public class QuixBugsTest {
     @Test
     public void testRPN_EVAL() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("rpn_eval");
-        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
         command.command.put("-maxgen", "3500");
@@ -75,13 +74,9 @@ public class QuixBugsTest {
     @Test
     public void testHANOI() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("hanoi");
-        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
         command.command.put("-maxgen", "3500");
-        command.command.put("-parameters", "logtestexecution:TRUE:"
-                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
-                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
@@ -96,7 +91,6 @@ public class QuixBugsTest {
     @Test
     public void testBUCKETSORT() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bucketsort");
-        IngredientPoolScope scope = IngredientPoolScope.PACKAGE;
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
         command.command.put("-maxgen", "500");

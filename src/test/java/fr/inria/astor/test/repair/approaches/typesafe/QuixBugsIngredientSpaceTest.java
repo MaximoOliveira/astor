@@ -3,6 +3,7 @@ package fr.inria.astor.test.repair.approaches.typesafe;
 import fr.inria.astor.approaches.typesafe.TypeSafeApproach;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ProgramVariant;
+import fr.inria.astor.core.entities.SuspiciousModificationPoint;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.TypeSafeExpressionTypeIngredientSpace;
 import fr.inria.astor.test.repair.QuixBugsRepairTest;
 import fr.inria.main.CommandSummary;
@@ -13,18 +14,71 @@ import spoon.reflect.declaration.CtElement;
 
 import java.util.List;
 
+/**
+ *  Class to verify that the plausible patch exists in the ingredient space
+ */
 public class QuixBugsIngredientSpaceTest {
 
     private final String mode = ExecutionMode.TYPESAFE.name();
 
+    // Correct
+    @Test
+    public void test_BITCOUNT_ingredientSpace() throws Exception {
 
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bitcount");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar,"n ^ (n - 1)",15);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+        assert(ingredients.stream().anyMatch(i -> i.toString().equals("_int_0 & (_int_0 - 1)")));
+
+    }
+
+    // Correct
+    @Test
+    public void test_BUCKETSORT_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bucketsort");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "arr", 22);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+        assert(ingredients.stream().anyMatch(i -> i.toString().equals("counts")));
+
+    }
+
+
+    // Overfitted
     @Test
     public void test_DFS_ingredientSpace() throws Exception {
 
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("depth_first_search");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "400");
-        command.command.put("-maxgen", "300");
+        command.command.put("-maxgen", "0");
 
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
@@ -37,22 +91,20 @@ public class QuixBugsIngredientSpaceTest {
 
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
-        CtElement suspiciousElement = pvar.getModificationPoints().stream()
-                .filter(e -> e.getCodeElement().toString().equals("successors")).findFirst().get()
-                .getCodeElement();
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "successors", 54);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
         assert(ingredients.stream().anyMatch(i -> i.toString().equals("predecessors")));
 
     }
 
+    // Correct
     @Test
     public void test_GCD_ingredientSpace() throws Exception {
 
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("gcd");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "123");
-        command.command.put("-maxgen", "300");
+        command.command.put("-maxgen", "0");
 
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
@@ -64,13 +116,97 @@ public class QuixBugsIngredientSpaceTest {
 
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
-        CtElement suspiciousElement = pvar.getModificationPoints().stream()
-                .filter(e -> e.getCodeElement().toString().equals("java_programs.GCD.gcd(a % b, b)")).findFirst().get()
-                .getCodeElement();
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "java_programs.GCD.gcd(a % b, b)", 19);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert(ingredients.stream().anyMatch(i -> i.toString().equals("java_programs.GCD.gcd(b, a % b)")));
+        assert(ingredients.stream().anyMatch(i -> i.toString().equals("java_programs.GCD.gcd(_int_0, _int_1 % _int_0)")));
 
     }
+
+    // Correct
+    @Test
+    public void test_RPN_EVAL_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("rpn_eval");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "bin_op.apply(a, b)", 34);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+        assert(ingredients.stream().anyMatch(i -> i.toString().equals("_BinaryOperator_0.apply(_Double_1, _Double_2)")));
+
+    }
+
+    // Correct
+    @Test
+    public void test_HANOI_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("hanoi");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar,
+                "steps.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(start, helper))",
+                27);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+        assert(ingredients.stream().anyMatch(i -> i.toString()
+                .equals("_ArrayList_0.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(_int_1, _int_2))")));
+
+    }
+
+    // Overfittted
+    @Test
+    public void test_GET_FACTORS_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("get_factors");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar,"n",18);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+        assert(ingredients.stream().anyMatch(i -> i.toString().equals("(_int_0 * _int_1)")));
+
+    }
+
+
+    public CtElement getSuspiciousElement(ProgramVariant pvar, String suspiciousElement, int lineNumber){
+        return pvar.getModificationPoints().stream()
+                .filter(se -> ((SuspiciousModificationPoint) se).getSuspicious().getLineNumber() == lineNumber
+                        && se.getCodeElement().toString().equals(suspiciousElement)).findFirst().get().getCodeElement();
+    }
+
 
 }
