@@ -91,7 +91,7 @@ public class QuixBugsIngredientSpaceTest {
 
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
-        CtElement suspiciousElement = getSuspiciousElement(pvar, "successors", 54);
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "successors", 50);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
         assert(ingredients.stream().anyMatch(i -> i.toString().equals("predecessors")));
