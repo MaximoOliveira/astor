@@ -2,6 +2,7 @@ package fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.core.entities.Ingredient;
+import fr.inria.astor.core.entities.IngredientFromDyna;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.manipulation.sourcecode.VarAccessWrapper;
 import fr.inria.astor.core.manipulation.sourcecode.VarCombinationForIngredient;
@@ -80,7 +81,7 @@ public class TypeSafeProbabilisticTransformationStrategy extends CacheTransforma
                 if (allCombinations.size() > 0) {
 
                     for (VarCombinationForIngredient varCombinationForIngredient : allCombinations) {
-
+                        //TODO PROBABLY ERROR IN HERE
                         DynamicIngredient ding = new DynamicIngredient(varCombinationForIngredient, mapping,
                                 codeElementToModifyFromBase);
                         // if i remove this the program breaks for some reason
