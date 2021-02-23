@@ -339,5 +339,22 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
+    @Test
+    public void testNEXT_PALINDROME() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("next_palindrome");
+        command.command.put("-mode", mode);
+        command.command.put("-seed", "17");
+        command.command.put("-maxgen", "5000");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
 
 }

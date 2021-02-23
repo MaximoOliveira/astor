@@ -108,7 +108,7 @@ public class InvocationExpanderHelper {
         parameters.forEach(param -> {
             String varNumber = String.valueOf(nrVars.getAndIncrement());
             CtVariableAccess newTemplate = createVarFromType(param, "var_" + varNumber);
-            newTemplate.setParent(invocation.getParent());
+            newTemplate.setParent(MutationSupporter.clone(invocation));
             templateArguments.add(newTemplate);
         });
 
@@ -128,7 +128,7 @@ public class InvocationExpanderHelper {
                 continue;
             }
 
-            String abstractName;
+            String abstractName = "";
             if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
                 String currentTypeName = var.getVariable().getType().getSimpleName();
                 if (currentTypeName.contains("?")) {

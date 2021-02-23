@@ -334,10 +334,11 @@ public class QuixBugsIngredientSpaceTest {
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "java_programs.FLATTEN.flatten(arr)", 26);
-
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert (ingredients.stream().anyMatch(i -> i.toString().equals("((java.util.ArrayList) (_Object_0))")));
-
+        Ingredient ingredient = ingredients.stream().filter(i ->
+                i.toString().equals("arr")).findFirst().orElse(null);
+        // ingredient exists
+        assert (ingredient != null);
     }
 
     // Correct
@@ -359,9 +360,18 @@ public class QuixBugsIngredientSpaceTest {
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "k", 25);
+        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert (ingredients.stream().anyMatch(i -> i.toString().equals("_int_0 - _int_1")));
+        Ingredient ingredient = ingredients.stream().filter(i ->
+                i.toString().equals("_int_0 - _int_1")).findFirst().orElse(null);
+        // ingredient template exists
+        assert (ingredient != null);
+
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        // verify that the solution is present
+        assert (ingredientsAfterTransformation.stream().anyMatch(i ->
+                i.toString().equals("k - num_lessoreq")));
 
     }
 
@@ -387,7 +397,6 @@ public class QuixBugsIngredientSpaceTest {
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
         assert (ingredients.stream().anyMatch(i -> i.toString().equals("length_by_edge")));
-
     }
 
     @Test
@@ -410,8 +419,10 @@ public class QuixBugsIngredientSpaceTest {
         CtElement suspiciousElement = getSuspiciousElement(pvar, "true", 24);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert (ingredients.stream().anyMatch(i -> i.toString().equals("_int_0 == _int_1")));
-
+        Ingredient ingredient = ingredients.stream().filter(i ->
+                i.toString().equals("depth == 0")).findFirst().orElse(null);
+        // ingredient solution exists
+        assert (ingredient != null);
     }
 
     // overfitted
@@ -432,11 +443,51 @@ public class QuixBugsIngredientSpaceTest {
 
         ProgramVariant pvar = typeSafe.getVariants().get(0);
 
-        CtElement suspiciousElement = getSuspiciousElement(pvar, "x - approx", 16);
+        CtElement suspiciousElement = getSuspiciousElement(pvar, "x", 16);
+        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert (ingredients.stream().anyMatch(i -> i.toString().equals("(_float_0 / _float_1)")));
 
+        Ingredient ingredient = ingredients.stream().filter(i ->
+                i.toString().equals("0.5F * (_float_0 + (_float_1 / _float_0))")).findFirst().orElse(null);
+        // ingredient template exists
+        assert (ingredient != null);
+
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        // verify that the solution is present
+        assert (ingredientsAfterTransformation.stream().anyMatch(i ->
+                i.toString().equals("0.5F * (approx + (x / approx))")));
+
+    }
+
+    // Overfitted
+    @Test
+    public void test_NEXT_PALINDROME_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("next_palindrome");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar,
+                "digit_list.length", 35);
+        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+
+        Ingredient ingredient = ingredients.stream().filter(i ->
+                i.toString().equals("2")).findFirst().orElse(null);
+        // ingredient  exists
+        assert (ingredient != null);
     }
 
     private List<Ingredient> ingredientsAfterTransformation(TypeSafeApproach typeSafe, ModificationPoint mp, Ingredient ingredient) {
