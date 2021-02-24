@@ -231,6 +231,7 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
+    @Ignore
     @Test
     public void testSHORTEST_PATH_LENGTHS() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("shortest_path_lengths");

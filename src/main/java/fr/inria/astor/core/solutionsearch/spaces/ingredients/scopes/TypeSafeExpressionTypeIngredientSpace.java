@@ -12,6 +12,7 @@ import fr.inria.astor.util.expand.InvocationExpanderHelper;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 
@@ -61,7 +62,8 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
                             ctExpr.setParent(parent);
                         }
                         CtCodeElement templateElement = MutationSupporter.clone(ctExpr);
-                        invocationExpanderHelper.formatIngredient(templateElement);
+                        if (!(templateElement instanceof CtVariableAccess))
+                            invocationExpanderHelper.formatIngredient(templateElement);
 
                         Ingredient templateIngredient = new Ingredient(templateElement);
 

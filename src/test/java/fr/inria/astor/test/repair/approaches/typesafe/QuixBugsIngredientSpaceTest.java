@@ -13,11 +13,11 @@ import fr.inria.astor.test.repair.QuixBugsRepairTest;
 import fr.inria.main.CommandSummary;
 import fr.inria.main.ExecutionMode;
 import fr.inria.main.evolution.AstorMain;
-import org.junit.Ignore;
 import org.junit.Test;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class to verify that the plausible patch exists in the ingredient space
@@ -212,7 +212,7 @@ public class QuixBugsIngredientSpaceTest {
         List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
-                i.toString().equals("steps.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(start, end)))")));
+                i.toString().equals("steps.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(start, end))")));
 
     }
 
@@ -238,7 +238,7 @@ public class QuixBugsIngredientSpaceTest {
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
 
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        
+
         Ingredient ingredient = ingredients.stream().filter(i ->
                 i.toString().equals("(_int_0 * _int_1)")).findFirst().orElse(null);
         // ingredient template exists
@@ -247,11 +247,11 @@ public class QuixBugsIngredientSpaceTest {
         List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
-                i.toString().equals("n * n")));
+                i.toString().equals("(n * n)")));
 
     }
 
-    // overfitted
+    // Correct
     @Test
     public void test_FIND_IN_SORTED_ingredientSpace() throws Exception {
 
@@ -272,12 +272,32 @@ public class QuixBugsIngredientSpaceTest {
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "end", 13);
 
+        // this one is overffited
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
         Ingredient ingredient = ingredients.stream().filter(i ->
                 i.toString().equals("start + ((end - start) / 2)")).findFirst().orElse(null);
         // ingredient exists
         assert (ingredient != null);
 
+        CtElement suspiciousElement2 = getSuspiciousElement(pvar,
+                "mid", 20);
+        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement2);
+
+
+        // correct one
+        List<Ingredient> ingredients2 = ingredientSpace.getIngredients(suspiciousElement2);
+        Ingredient ingredient2 = ingredients.stream().filter(i ->
+                i.toString().equals("(_int_0 + 1)")).collect(Collectors.toList()).get(0);
+
+        // ingredient exists
+        assert (ingredient2 != null);
+
+        // correct one
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient2);
+        assert (ingredientsAfterTransformation.stream().anyMatch(i ->
+                i.toString().equals("(mid + 1)")));
+
+        int debug = 0;
 
     }
 
@@ -513,45 +533,5 @@ public class QuixBugsIngredientSpaceTest {
                 .filter(se -> ((SuspiciousModificationPoint) se).getSuspicious().getLineNumber() == lineNumber
                         && se.getCodeElement().toString().equals(suspiciousElement)).findFirst().get().getCodeElement();
     }
-
-    // problem..
-    @Ignore
-    @Test
-    public void bucketSort_test_later() throws Exception {
-
-        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bucketsort");
-        command.command.put("-mode", mode);
-        command.command.put("-maxgen", "0");
-
-        AstorMain main1 = new AstorMain();
-        main1.execute(command.flat());
-
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
-
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
-                .getIngredientSearchStrategy().getIngredientSpace();
-
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
-
-        CtElement suspiciousElement = getSuspiciousElement(pvar, "arr", 22);
-
-        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        assert (ingredients.stream().anyMatch(i -> i.toString().equals("counts")));
-
-
-        TypeSafeProbabilisticIngredientStrategy ingredientStrategy = (TypeSafeProbabilisticIngredientStrategy) typeSafe.getIngredientSearchStrategy();
-
-        IngredientTransformationStrategy transformationStrategy = ingredientStrategy.getIngredientTransformationStrategy();
-
-        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
-        List<Ingredient> baseElements = ingredientStrategy.getNotExhaustedBaseElements(modPoint, new ExpressionReplaceOperator());
-        Ingredient baseIngredient = baseElements.stream().filter(t -> t.toString().equals("_ArrayList_0")).findFirst().get();
-
-        List<Ingredient> transformedIngredients = transformationStrategy.transform(modPoint, baseIngredient);
-
-        int test = 0;
-
-    }
-
 
 }

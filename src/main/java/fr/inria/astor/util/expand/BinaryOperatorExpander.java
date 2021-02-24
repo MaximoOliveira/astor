@@ -1,9 +1,7 @@
 package fr.inria.astor.util.expand;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
-import spoon.reflect.code.CtCodeElement;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.*;
 import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtLocalVariableReference;
@@ -21,7 +19,7 @@ public class BinaryOperatorExpander {
     CodeFactory codeFactory = MutationSupporter.factory.Code();
     BinaryOperatorExpanderHelper binaryOperatorHelper = new BinaryOperatorExpanderHelper();
 
-    public Set<CtBinaryOperatorImpl> createBinaryOperators(Set<CtCodeElement> ingredientSpace){
+    public Set<CtBinaryOperatorImpl> createBinaryOperators(Set<CtCodeElement> ingredientSpace) {
         List<CtCodeElement> binaryOperators = ingredientSpace.stream().filter(i ->
                 i.getClass().equals(CtBinaryOperatorImpl.class))
                 .collect(Collectors.toList());
@@ -29,13 +27,16 @@ public class BinaryOperatorExpander {
         CtCodeElement codeElement = ingredientSpace.stream().findFirst().get();
         Set<CtBinaryOperatorImpl> binaryOpsReturnTypeInt = createBinaryOpsReturnTypeInt(codeElement);
         Set<CtBinaryOperatorImpl> binaryOpsBooleanReturnTypeBoolean = createBinaryOpsReturnTypeBoolean(codeElement);
+        Set<CtBinaryOperatorImpl> binaryOpsWithLiteral = createBinaryOpsWithLiteral(codeElement);
         Set<CtBinaryOperatorImpl> allBinaryOperators = new HashSet<>();
         allBinaryOperators.addAll(expandedBinaryOperators);
         allBinaryOperators.addAll(binaryOpsReturnTypeInt);
         allBinaryOperators.addAll(binaryOpsBooleanReturnTypeBoolean);
+        allBinaryOperators.addAll(binaryOpsWithLiteral);
         return allBinaryOperators;
     }
 
+    //TODO refactor
     public Set<CtBinaryOperatorImpl> expandBinaryOperators(List<CtCodeElement> binaryOperators) {
         Set<CtBinaryOperatorImpl> allOperators = new HashSet<>();
         binaryOperators.forEach(element -> {
@@ -83,16 +84,11 @@ public class BinaryOperatorExpander {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
 
-        binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
-            CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
-            ctBinaryOperator.setKind(ao);
-            ctBinaryOperator.setType(new TypeFactory().integerPrimitiveType());
-            CtVariableAccess leftLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
-            CtVariableAccess rightLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
-            ctBinaryOperator.setLeftHandOperand(leftLiteral);
-            ctBinaryOperator.setRightHandOperand(rightLiteral);
-            ctBinaryOperator.setParent(clonedElement.getParent());
-            ctBinaryOperator.setPosition(clonedElement.getPosition());
+        binaryOperatorHelper.getArithmeticOperators().forEach(kind -> {
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess rightExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
+           CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightExpression, kind);
+            ctBinaryOperator.setType(typeFactory.integerPrimitiveType());
             set.add(ctBinaryOperator);
         });
         return set;
@@ -102,20 +98,40 @@ public class BinaryOperatorExpander {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
 
-        binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(bo -> {
-            CtBinaryOperatorImpl ctBinaryOperator = new CtBinaryOperatorImpl();
-            ctBinaryOperator.setKind(bo);
-            ctBinaryOperator.setType(new TypeFactory().booleanPrimitiveType());
-            CtVariableAccess leftLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
-            CtVariableAccess rightLiteral = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
-            ctBinaryOperator.setLeftHandOperand(leftLiteral);
-            ctBinaryOperator.setRightHandOperand(rightLiteral);
-            ctBinaryOperator.setParent(clonedElement.getParent());
-            ctBinaryOperator.setPosition(clonedElement.getPosition());
+        binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(kind -> {
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess rightExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
+           CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightExpression, kind);
+           ctBinaryOperator.setType(typeFactory.booleanPrimitiveType());
             set.add(ctBinaryOperator);
         });
         return set;
     }
+
+    private Set<CtBinaryOperatorImpl> createBinaryOpsWithLiteral(CtCodeElement codeElement) {
+        Set<CtBinaryOperatorImpl> set = new HashSet<>();
+        Set<BinaryOperatorKind> binOps = new HashSet<>();
+        binOps.add(BinaryOperatorKind.PLUS);
+        binOps.add(BinaryOperatorKind.MINUS);
+        CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
+        binOps.forEach(kind -> {
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtLiteral rightLiteral = codeFactory.createLiteral(1);
+            CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightLiteral, kind);
+            ctBinaryOperator.setType(typeFactory.integerPrimitiveType());
+            set.add(ctBinaryOperator);
+        });
+        return set;
+    }
+
+    private CtBinaryOperatorImpl createBinaryOperator(CtCodeElement codeElement, CtExpression<?> leftExpression,
+                                                      CtExpression<?> rightExpression, BinaryOperatorKind kind) {
+        CtBinaryOperatorImpl binaryOperator = (CtBinaryOperatorImpl) codeFactory.createBinaryOperator(leftExpression, rightExpression, kind);
+        binaryOperator.setParent(codeElement.getParent());
+        binaryOperator.setPosition(codeElement.getPosition());
+        return binaryOperator;
+    }
+
 
     private CtVariableAccess createVarFromType(CtTypeReference ctTypeReference, String name) {
         CtLocalVariableReference varReference = codeFactory.createLocalVariableReference(ctTypeReference, name);

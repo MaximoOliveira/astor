@@ -7,9 +7,9 @@ import java.util.List;
 
 public class BinaryOperatorExpanderHelper {
 
-    List<BinaryOperatorKind> arithmeticOperators = new LinkedList<>();
-    List<BinaryOperatorKind> booleanOperators = new LinkedList<>();
-    List<BinaryOperatorKind> arithmeticOperatorsWhenReturnTypeIsBoolean = new LinkedList<>();
+    private List<BinaryOperatorKind> arithmeticOperators = new LinkedList<>();
+    private List<BinaryOperatorKind> booleanOperators = new LinkedList<>();
+    private List<BinaryOperatorKind> arithmeticOperatorsWhenReturnTypeIsBoolean = new LinkedList<>();
 
     public BinaryOperatorExpanderHelper() {
         initializeArithmeticOperators();
