@@ -50,6 +50,7 @@ public class InvocationExpander {
      */
     public Set<Set<CtInvocationImpl>> createAllPermutationsFromInvocations(Set<CtInvocationImpl> invocations) {
         return invocations.stream()
+                .filter(invocationExpanderHelper::parameterTypesAllEqual)
                 .map(invocationExpanderHelper::createAllPermutationsFromInvocation).collect(Collectors.toSet());
     }
 

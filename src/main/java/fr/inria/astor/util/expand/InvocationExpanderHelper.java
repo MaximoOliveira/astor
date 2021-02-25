@@ -8,10 +8,13 @@ import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.support.reflect.code.CtFieldReadImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
 import spoon.support.reflect.code.CtUnaryOperatorImpl;
 
@@ -70,6 +73,10 @@ public class InvocationExpanderHelper {
         return clonedInvocation;
     }
 
+    public boolean parameterTypesAllEqual(CtInvocationImpl invocation){
+        return new HashSet<>(invocation.getExecutable().getParameters()).size() == 1;
+    }
+
     /**
      * Given an invocation, return a negated version of this invocation.
      * It returns  negated invocation if this invocation if of boolean type.
@@ -124,10 +131,6 @@ public class InvocationExpanderHelper {
         for (int i = 0; i < varAccessCollected.size(); i++) {
             CtVariableAccess var = varAccessCollected.get(i);
 
-            if (VariableResolver.isStatic(var.getVariable())) {
-                continue;
-            }
-
             String abstractName = "";
             if (!varMappings.containsKey(var.getVariable().getSimpleName())) {
                 String currentTypeName = var.getVariable().getType().getSimpleName();
@@ -147,8 +150,9 @@ public class InvocationExpanderHelper {
             // workaround: Problems with var Shadowing
             var.getFactory().getEnvironment().setNoClasspath(true);
             if (var instanceof CtFieldAccess) {
-                CtFieldAccess fieldAccess = (CtFieldAccess) var;
-                fieldAccess.getVariable().setDeclaringType(null);
+                ((CtFieldReference)var.getVariable()).setDeclaringType(var.getType());
+                ((CtFieldReadImpl) var).setTarget(null);
+                ((CtFieldReference)var.getVariable()).setStatic(false);
             }
 
         }

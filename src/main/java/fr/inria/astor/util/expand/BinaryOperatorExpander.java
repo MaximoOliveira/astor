@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
 
 public class BinaryOperatorExpander {
 
-    TypeFactory typeFactory = MutationSupporter.factory.Type();
-    CodeFactory codeFactory = MutationSupporter.factory.Code();
-    BinaryOperatorExpanderHelper binaryOperatorHelper = new BinaryOperatorExpanderHelper();
+    private final TypeFactory typeFactory = MutationSupporter.factory.Type();
+    private final CodeFactory codeFactory = MutationSupporter.factory.Code();
+    private final BinaryOperatorExpanderHelper binaryOperatorHelper = new BinaryOperatorExpanderHelper();
+    private final TypeInfo typeInfo = new TypeInfo();
 
     public Set<CtBinaryOperatorImpl> createBinaryOperators(Set<CtCodeElement> ingredientSpace) {
         List<CtCodeElement> binaryOperators = ingredientSpace.stream().filter(i ->
@@ -45,7 +46,7 @@ public class BinaryOperatorExpander {
             CtExpression rightExpression = binaryOperator.getRightHandOperand();
             CtTypeReference type = leftExpression.getType();
             CtTypeReference returnType = binaryOperator.getType();
-            if (returnType.getSimpleName().equals("boolean") && type.getSimpleName().equals("int")) {
+            if (returnType.equals(typeFactory.booleanPrimitiveType()) && typeInfo.getArithmeticTypes().contains(type)) {
                 binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(bo -> {
                     CtBinaryOperatorImpl synthesizedBinaryOperator =
                             (CtBinaryOperatorImpl) MutationSupporter.factory
@@ -55,7 +56,7 @@ public class BinaryOperatorExpander {
                     synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
                     allOperators.add(synthesizedBinaryOperator);
                 });
-            } else if (type.getSimpleName().equals("int")) {
+            } else if (typeInfo.getArithmeticTypes().contains(type)) {
                 binaryOperatorHelper.getArithmeticOperators().forEach(ao -> {
                     CtBinaryOperatorImpl synthesizedBinaryOperator =
                             (CtBinaryOperatorImpl) MutationSupporter.factory
@@ -65,7 +66,7 @@ public class BinaryOperatorExpander {
                     synthesizedBinaryOperator.setType(((CtBinaryOperatorImpl<?>) element).getType());
                     allOperators.add(synthesizedBinaryOperator);
                 });
-            } else if (type.getSimpleName().equals("boolean")) {
+            } else if (type.equals(typeFactory.booleanPrimitiveType())) {
                 binaryOperatorHelper.getBooleanOperators().forEach(ao -> {
                     CtBinaryOperatorImpl synthesizedBinaryOperator =
                             (CtBinaryOperatorImpl) MutationSupporter.factory
@@ -80,6 +81,7 @@ public class BinaryOperatorExpander {
         return allOperators;
     }
 
+    // this can probably be removed
     public Set<CtBinaryOperatorImpl> createBinaryOpsReturnTypeInt(CtCodeElement codeElement) {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
@@ -94,6 +96,7 @@ public class BinaryOperatorExpander {
         return set;
     }
 
+    // this can probably be removed
     private Set<CtBinaryOperatorImpl> createBinaryOpsReturnTypeBoolean(CtCodeElement codeElement) {
         Set<CtBinaryOperatorImpl> set = new HashSet<>();
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);

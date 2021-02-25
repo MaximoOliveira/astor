@@ -61,10 +61,7 @@ public class TypeSafeProbabilisticTransformationStrategy extends CacheTransforma
             logger.debug("The modification point  has not any var in scope");
         }
 
-        List<CtVariable> localVarsWithNullValue = modificationPoint.getContextOfModificationPoint().stream()
-                .filter(ctVariable -> ctVariable instanceof CtLocalVariable && ctVariable.getDefaultExpression() == null).collect(Collectors.toList());
         List<CtVariable> validContext = modificationPoint.getContextOfModificationPoint().stream().collect(Collectors.toList());
-        validContext.removeAll(localVarsWithNullValue);
         VarMapping mapping = VariableResolver.mapVariablesFromContext(validContext,
                 codeElementToModifyFromBase);
         // if we map all variables

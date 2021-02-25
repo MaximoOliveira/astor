@@ -524,7 +524,9 @@ public class VariableResolver {
 		CtTypeReference refCluster = varInScope.getType();
 		CtTypeReference refOut = varOutScope.getType();
 
-		return areTypesCompatible(refCluster, refOut);
+		boolean sameTypeDeclaration = refOut.getTypeDeclaration().equals(refCluster.getTypeDeclaration());
+
+		return areTypesCompatible(refCluster, refOut) || sameTypeDeclaration;
 	}
 
 	public static boolean areTypesCompatible(CtTypeReference type1, CtTypeReference type2) {
