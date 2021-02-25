@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
  *      SHORTEST_PATH_LENGTHS
  *      SHORTEST_PATHS
  *      SQRT
+ *      TOPOLOGICAL_ORDERING
  */
 public class QuixBugsIngredientSpaceTest {
 
@@ -820,6 +821,42 @@ public class QuixBugsIngredientSpaceTest {
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("weight_by_node.put(edge.get(1), update_weight)")));
+
+    }
+
+    // correct
+    @Test
+    public void test_TOPOLOGICAL_ORDERING_ingredientSpace() throws Exception {
+
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("topological_ordering");
+        command.command.put("-mode", mode);
+        command.command.put("-maxgen", "0");
+
+        AstorMain main1 = new AstorMain();
+        main1.execute(command.flat());
+
+        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+
+        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+                .getIngredientSearchStrategy().getIngredientSpace();
+
+        ProgramVariant pvar = typeSafe.getVariants().get(0);
+
+        CtElement suspiciousElement = getSuspiciousElement(pvar,
+                "nextNode.getSuccessors()", 17);
+        ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
+
+        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
+
+        Ingredient ingredient = ingredients.stream()
+                .filter(i -> i.toString().equals("_Node_0.getPredecessors()")).findFirst().orElse(null);
+        // ingredient  template exists
+        assert (ingredient != null);
+
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        // verify that the solution is present
+        assert (ingredientsAfterTransformation.stream().anyMatch(i ->
+                i.toString().equals("nextNode.getPredecessors()")));
 
     }
 

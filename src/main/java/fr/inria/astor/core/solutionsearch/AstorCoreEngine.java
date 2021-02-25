@@ -607,7 +607,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
                     // if fix content is the same that original buggy
                     // content, we do not write the patch, remaining empty
                     // the property fixed statement
-                    if (genOperationInstance.getModified().toString() != genOperationInstance.getOriginal().toString())
+                    if (!genOperationInstance.getModified().toString().equals(genOperationInstance.getOriginal().toString()))
                         line += genOperationInstance.getModified().toString();
                     else {
                         line += genOperationInstance.getOriginal().toString();
@@ -1252,8 +1252,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
                         // if fix content is the same that original buggy
                         // content, we do not write the patch, remaining empty
                         // the property fixed statement
-                        if (genOperationInstance.getModified().toString() != genOperationInstance.getOriginal()
-                                .toString())
+                        if (!genOperationInstance.getModified().toString().equals(genOperationInstance.getOriginal().toString()))
 
                             hunk.getStats().put(HunkStatEnum.PATCH_HUNK_CODE,
                                     genOperationInstance.getModified().toString());

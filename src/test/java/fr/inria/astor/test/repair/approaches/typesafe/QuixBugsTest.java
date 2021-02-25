@@ -2,7 +2,6 @@ package fr.inria.astor.test.repair.approaches.typesafe;
 
 import fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalization;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.test.repair.QuixBugsRepairTest;
 import fr.inria.main.CommandSummary;
 import fr.inria.main.ExecutionMode;
@@ -322,12 +321,11 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore
     @Test
-    public void testSIEVE() throws Exception {
-        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("sieve");
+    public void testNEXT_PALINDROME() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("next_palindrome");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "123");
+        command.command.put("-seed", "17");
         command.command.put("-maxgen", "5000");
 
         AstorMain main1 = new AstorMain();
@@ -340,9 +338,10 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
+    @Ignore //2 much memory
     @Test
-    public void testNEXT_PALINDROME() throws Exception {
-        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("next_palindrome");
+    public void testTOPOLOGICAL_ORDERING() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("topological_ordering");
         command.command.put("-mode", mode);
         command.command.put("-seed", "17");
         command.command.put("-maxgen", "5000");
