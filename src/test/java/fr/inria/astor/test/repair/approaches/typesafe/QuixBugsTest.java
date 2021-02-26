@@ -338,13 +338,13 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore //2 much memory
+    @Ignore
     @Test
     public void testTOPOLOGICAL_ORDERING() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("topological_ordering");
         command.command.put("-mode", mode);
         command.command.put("-seed", "17");
-        command.command.put("-maxgen", "5000");
+        command.command.put("-maxgen", "1000");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));

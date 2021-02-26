@@ -19,7 +19,7 @@ public abstract class ProgramVariantValidator implements AstorExtensionPoint {
 
 	public void setStats(Stats stats) {
 		currentStats = stats;
-	};
+	}
 
 	/**
 	 * Validates a program variant

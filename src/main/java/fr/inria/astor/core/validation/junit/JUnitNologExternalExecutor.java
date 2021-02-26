@@ -14,7 +14,6 @@ public class JUnitNologExternalExecutor extends JUnitExternalExecutor {
 
 	@Override
 	public String createOutput(Result r) {
-		String out = "[";
 		int nr_failures = 0;
 		try {
 			for (Failure f : r.getFailures()) {
@@ -26,7 +25,7 @@ public class JUnitNologExternalExecutor extends JUnitExternalExecutor {
 		} catch (Exception e) {
 			// We do not care about this exception,
 		}
-		out = out + "]";
+
 		return (OUTSEP + r.getRunCount() + OUTSEP + nr_failures + OUTSEP + "" + OUTSEP);
 	}
 
