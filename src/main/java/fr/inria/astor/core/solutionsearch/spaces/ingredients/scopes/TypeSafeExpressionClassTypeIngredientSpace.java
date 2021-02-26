@@ -37,9 +37,13 @@ public class TypeSafeExpressionClassTypeIngredientSpace extends TypeSafeExpressi
         if (ingredientsKey == null) {
             ingredientsKey = new LinkedList<>();
         }
-        Ingredient ingredient = new Ingredient(MutationSupporter.clone(ctExpr));
-        ingredientsKey.add(ingredient);
-        mkp.put(keyLocation, returnTypeExpression, ingredientsKey);
+
+        if (!ctExpr.toString().contains("varname")) {
+            Ingredient ingredient = new Ingredient(MutationSupporter.clone(ctExpr));
+            ingredientsKey.add(ingredient);
+            mkp.put(keyLocation, returnTypeExpression, ingredientsKey);
+        }
+
 
         return ingredientsKey;
     }

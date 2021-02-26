@@ -16,6 +16,7 @@ import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredi
         expander = new Expander();
     }
 
-    @Override
+    @Override //TODO REFACTOR THIS INTO SMALLER METHODS
     public void defineSpace(ProgramVariant variant) {
 
         List<CtType<?>> affected = obtainClassesFromScope(variant);

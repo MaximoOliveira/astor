@@ -87,7 +87,7 @@ public class BinaryOperatorExpander {
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
 
         binaryOperatorHelper.getArithmeticOperators().forEach(kind -> {
-            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname1");
             CtVariableAccess rightExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
            CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightExpression, kind);
             ctBinaryOperator.setType(typeFactory.integerPrimitiveType());
@@ -102,7 +102,7 @@ public class BinaryOperatorExpander {
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
 
         binaryOperatorHelper.getArithmeticOperatorsWhenReturnTypeIsBoolean().forEach(kind -> {
-            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname1");
             CtVariableAccess rightExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname2");
            CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightExpression, kind);
            ctBinaryOperator.setType(typeFactory.booleanPrimitiveType());
@@ -118,7 +118,7 @@ public class BinaryOperatorExpander {
         binOps.add(BinaryOperatorKind.MINUS);
         CtCodeElement clonedElement = MutationSupporter.clone(codeElement);
         binOps.forEach(kind -> {
-            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varnname1");
+            CtVariableAccess leftExpression = createVarFromType(typeFactory.integerPrimitiveType(), "varname1");
             CtLiteral rightLiteral = codeFactory.createLiteral(1);
             CtBinaryOperatorImpl ctBinaryOperator = createBinaryOperator(clonedElement, leftExpression, rightLiteral, kind);
             ctBinaryOperator.setType(typeFactory.integerPrimitiveType());
