@@ -160,27 +160,28 @@ public class LaucherJUnitProcess {
         if (p == null)
             return;
 
-        Object pid = null;
+        long pid=0;
         try {
-            Field f = p.getClass().getDeclaredField("pid");
-            f.setAccessible(true);
-            pid = f.get(p);
+            pid = getPidOfProcess(p);
             log.debug("-Killed id: pid->" + pid);
 
         } catch (Exception e) {
             log.error(e);
         }
+        p.destroy();
         p.destroyForcibly();
 
         log.info("The Process that runs JUnit test cases did not terminate within waitTime of "
                 + TimeUnit.MILLISECONDS.toSeconds(waitTime) + " seconds");
         log.info("Killed the Process that runs JUnit test cases " + pid);
 
-        Integer subprocessid = Integer.valueOf(pid.toString()) + 1;
+        long subprocessid = pid + 1;
         try {
             log.debug("Killing subprocess " + subprocessid);
-            Process process = new ProcessBuilder(new String[]{"kill", subprocessid.toString()}).start();
+            Process process = new ProcessBuilder(new String[]{"kill", String.valueOf(subprocessid)}).start();
             process.waitFor();
+            process.destroy();
+            process.destroyForcibly();
 
         } catch (Exception e) {
             log.error("Problems killing subprocess " + subprocessid);
@@ -188,6 +189,22 @@ public class LaucherJUnitProcess {
         }
 
 
+    }
+
+    public static synchronized long getPidOfProcess(Process p) {
+        long pid = -1;
+
+        try {
+            if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+                Field f = p.getClass().getDeclaredField("pid");
+                f.setAccessible(true);
+                pid = f.getLong(p);
+                f.setAccessible(false);
+            }
+        } catch (Exception e) {
+            pid = -1;
+        }
+        return pid;
     }
 
     protected String urlArrayToString(URL[] urls) {

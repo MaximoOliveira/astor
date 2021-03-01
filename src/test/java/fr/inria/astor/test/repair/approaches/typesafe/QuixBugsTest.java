@@ -17,12 +17,12 @@ public class QuixBugsTest {
 
     private final String mode = ExecutionMode.TYPESAFE.name();
 
-    @Ignore
+    @Ignore // takes 10 mins
     @Test
-    public void testBITCOUNT() throws Exception {
+    public void bitcount() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bitcount");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "123");
+        command.command.put("-seed", "28");
         command.command.put("-maxgen", "500");
 
         AstorMain main1 = new AstorMain();
@@ -35,13 +35,12 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore // taking to much time with this setup
     @Test
-    public void testLEVENSHTEIN() throws Exception {
+    public void levenshtein() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("levenshtein");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "100");
-        command.command.put("-maxgen", "5000");
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "200");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
@@ -54,7 +53,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testRPN_EVAL() throws Exception {
+    public void rpn_eval() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("rpn_eval");
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
@@ -71,7 +70,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testHANOI() throws Exception {
+    public void hanoi() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("hanoi");
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
@@ -88,7 +87,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testBUCKETSORT() throws Exception {
+    public void bucketsort() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("bucketsort");
         command.command.put("-mode", mode);
         command.command.put("-seed", "100");
@@ -107,17 +106,13 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    // Is not working with 100 generations, need to test more. takes long time
-    @Ignore
+
     @Test
-    public void testGET_FACTORS() throws Exception {
+    public void get_factors() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("get_factors");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "100");
-        command.command.put("-maxgen", "100");
-        command.command.put("-parameters", "logtestexecution:TRUE:"
-                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
-                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "120");
         command.command.put("-stopfirst", "true");
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
@@ -131,7 +126,7 @@ public class QuixBugsTest {
 
     @Ignore // takes a lot of time here
     @Test
-    public void testFIND_FIRST_IN_SORTED() throws Exception {
+    public void find_first_in_sorted() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("find_first_in_sorted");
         command.command.put("-mode", mode);
         command.command.put("-seed", "123");
@@ -152,11 +147,11 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testFLATTEN() throws Exception {
+    public void flatten() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("flatten");
         command.command.put("-mode", mode);
         command.command.put("-seed", "400");
-        command.command.put("-maxgen", "1000");
+        command.command.put("-maxgen", "300");
 
 
         AstorMain main1 = new AstorMain();
@@ -169,17 +164,13 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore //TODO test with larger maxgen
     @Test
-    public void testQUICKSORT() throws Exception {
+    public void quicksort() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("quicksort");
 
         command.command.put("-mode", mode);
-        command.command.put("-seed", "100");
-        command.command.put("-maxgen", "15000");
-        command.command.put("-parameters", "logtestexecution:TRUE:"
-                + "disablelog:FALSE:maxtime:120:autocompile:false:gzoltarpackagetonotinstrument:com.google.gson_engine"
-                + GZoltarFaultLocalization.PACKAGE_SEPARATOR + "java_programs_test");
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "300");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
@@ -192,7 +183,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testDFS() throws Exception {
+    public void depth_first_search() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("depth_first_search");
         command.command.put("-mode", mode);
         command.command.put("-seed", "400");
@@ -209,7 +200,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testKTH() throws Exception {
+    public void kth() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("kth");
         command.command.put("-mode", mode);
         command.command.put("-seed", "400");
@@ -232,7 +223,7 @@ public class QuixBugsTest {
 
     @Ignore
     @Test
-    public void testSHORTEST_PATH_LENGTHS() throws Exception {
+    public void shortest_path_lengths() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("shortest_path_lengths");
         command.command.put("-mode", mode);
         command.command.put("-seed", "123");
@@ -250,11 +241,10 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testIS_VALID_PARENTHESIZATION() throws Exception {
+    public void is_valid_parenthesization() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("is_valid_parenthesization");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "123");
-        command.command.put("-flthreshold", "0.5");
+        command.command.put("-seed", "28");
         command.command.put("-maxgen", "3000");
 
 
@@ -268,14 +258,13 @@ public class QuixBugsTest {
         assertEquals(1, engine.getSolutions().size());
     }
 
-    @Ignore // is not being fixed in this setup. Works in RepairThemAll
+    @Ignore // takes 2 much time
     @Test
-    public void testSQRT() throws Exception {
+    public void sqrt() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("sqrt");
         command.command.put("-mode", mode);
-        command.command.put("-seed", "123");
-        command.command.put("-maxgen", "5000");
-        command.command.put("-parameters", "tmax1:20000:disablelog:false:maxCombinationVariableLimit:true:maxVarCombination:1000");
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "10000");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
@@ -288,7 +277,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testFIND_IN_SORTED() throws Exception {
+    public void find_in_sorted() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("find_in_sorted");
         command.command.put("-seed", "123");
         command.command.put("-maxgen", "1000");
@@ -305,7 +294,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testGCD() throws Exception {
+    public void gcd() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("gcd");
         command.command.put("-mode", mode);
         command.command.put("-seed", "123");
@@ -322,7 +311,7 @@ public class QuixBugsTest {
     }
 
     @Test
-    public void testNEXT_PALINDROME() throws Exception {
+    public void next_palindrome() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("next_palindrome");
         command.command.put("-mode", mode);
         command.command.put("-seed", "17");
@@ -340,11 +329,65 @@ public class QuixBugsTest {
 
     @Ignore
     @Test
-    public void testTOPOLOGICAL_ORDERING() throws Exception {
+    public void topological_ordering() throws Exception {
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("topological_ordering");
         command.command.put("-mode", mode);
         command.command.put("-seed", "17");
         command.command.put("-maxgen", "1000");
+        command.command.put("-flthreshold", "1.0");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
+    @Ignore
+    @Test
+    public void shortest_paths() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("shortest_paths");
+        command.command.put("-mode", mode);
+        command.command.put("-seed", "17");
+        command.command.put("-maxgen", "1000");
+        command.command.put("-flthreshold", "1.0");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
+    @Test
+    public void mergesort() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("mergesort");
+        command.command.put("-mode", mode);
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "100");
+
+        AstorMain main1 = new AstorMain();
+        System.out.println(Arrays.toString(command.flat()));
+        main1.execute(command.flat());
+
+        AstorCoreEngine engine = main1.getEngine();
+
+        // We found a solution with typesafe
+        assertEquals(1, engine.getSolutions().size());
+    }
+
+    @Test
+    public void longest_common_subsequence() throws Exception {
+        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("longest_common_subsequence");
+        command.command.put("-mode", mode);
+        command.command.put("-seed", "28");
+        command.command.put("-maxgen", "300");
 
         AstorMain main1 = new AstorMain();
         System.out.println(Arrays.toString(command.flat()));
