@@ -18,7 +18,7 @@ public enum ExecutionMode {
 	EXASTOR(Arrays.asList("exhaustive", "exastor")),
 	SCAFFOLD(Collections.singletonList("scaffold")),
 	custom(Collections.singletonList("custom")),
-	TYPESAFE(Collections.singletonList("typesafe"));
+	FIGRA(Collections.singletonList("figra"));
 
 	private List<String> acceptedNames;
 

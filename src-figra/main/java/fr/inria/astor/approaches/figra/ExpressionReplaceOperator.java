@@ -1,4 +1,4 @@
-package fr.inria.astor.approaches.typesafe;
+package fr.inria.astor.approaches.figra;
 
 import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
 import fr.inria.astor.core.entities.*;

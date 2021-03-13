@@ -1,11 +1,11 @@
-package fr.inria.astor.approaches.typesafe;
+package fr.inria.astor.approaches.figra;
 
 import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
 
 
-public class TypeSafeOperatorSpace extends OperatorSpace {
+public class FigraOperatorSpace extends OperatorSpace {
 
-    public TypeSafeOperatorSpace() {
+    public FigraOperatorSpace() {
         super.register(new ExpressionReplaceOperator());
     }
 }

@@ -8,7 +8,7 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.TypeSafeExpressionTypeIngredientSpace;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.FigraExpressionTypeIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
@@ -26,7 +26,7 @@ import spoon.support.reflect.code.CtInvocationImpl;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStrategy {
+public class FigraProbabilisticIngredientStrategy extends IngredientSearchStrategy {
 
     IngredientTransformationStrategy ingredientTransformationStrategy;
 
@@ -40,7 +40,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
     List<String> elements2String = null;
     Map<String, Double> probs = null;
 
-    public TypeSafeProbabilisticIngredientStrategy(IngredientPool space) {
+    public FigraProbabilisticIngredientStrategy(IngredientPool space) {
         super(space);
 
         try {
@@ -192,7 +192,7 @@ public class TypeSafeProbabilisticIngredientStrategy extends IngredientSearchStr
 
         if (ConfigurationProperties.getPropertyBool("frequenttemplate")) {
             log.debug("Defining template order for " + modificationPoint);
-            TypeSafeExpressionTypeIngredientSpace space = (TypeSafeExpressionTypeIngredientSpace) this.getIngredientSpace();
+            FigraExpressionTypeIngredientSpace space = (FigraExpressionTypeIngredientSpace) this.getIngredientSpace();
 
             // Ingredients from space
             // ingredients to string

@@ -1,4 +1,4 @@
-package fr.inria.astor.test.repair.approaches.typesafe;
+package fr.inria.astor.test.repair.approaches.figra;
 
 import fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalization;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 
 public class QuixBugsTest {
 
-    private final String mode = ExecutionMode.TYPESAFE.name();
+    private final String mode = ExecutionMode.FIGRA.name();
 
     @Ignore // takes 10 mins
     @Test
@@ -31,7 +31,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -48,7 +48,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -65,7 +65,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -82,7 +82,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -102,7 +102,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -120,7 +120,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -142,7 +142,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -160,7 +160,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -178,7 +178,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -195,7 +195,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -217,7 +217,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -236,7 +236,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -254,7 +254,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -272,7 +272,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -289,7 +289,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         //assertEquals(1, engine.getSolutions().size());
     }
 
@@ -306,7 +306,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -323,7 +323,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -342,7 +342,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -361,7 +361,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -378,7 +378,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 
@@ -395,7 +395,7 @@ public class QuixBugsTest {
 
         AstorCoreEngine engine = main1.getEngine();
 
-        // We found a solution with typesafe
+        // We found a solution with figra
         assertEquals(1, engine.getSolutions().size());
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import fr.inria.astor.approaches.typesafe.TypeSafeOperatorSpace;
+import fr.inria.astor.approaches.figra.FigraOperatorSpace;
 import fr.inria.astor.core.manipulation.filters.*;
 import fr.inria.astor.core.solutionsearch.navigation.*;
 import org.apache.commons.collections.map.HashedMap;
@@ -67,7 +67,6 @@ import fr.inria.astor.util.TimeUtil;
 import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
-import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
@@ -973,8 +972,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
             suspiciousNavigationStrategy = new InOrderSuspiciousNavigation();
         } else if (SuspiciousNavigationValues.WEIGHT.toString().equals(mode))
             suspiciousNavigationStrategy = new WeightRandomSuspiciousNavitation();
-        else if (SuspiciousNavigationValues.TYPESAFE_WEIGHT.toString().equals(mode))
-            suspiciousNavigationStrategy = new TypeSafeWeightRandomSuspiciousNavigation();
+        else if (SuspiciousNavigationValues.FIGRA_WEIGHT.toString().equals(mode))
+            suspiciousNavigationStrategy = new FigraWeightRandomSuspiciousNavigation();
         else if (SuspiciousNavigationValues.RANDOM.toString().equals(mode)) {
             suspiciousNavigationStrategy = new UniformRandomSuspiciousNavigation();
         } else if (SuspiciousNavigationValues.SEQUENCE.toString().equals(mode)) {
@@ -1007,8 +1006,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
             } else if ("r-expression".equals(repairOperatorsArgument)
                     || "cardumenspace".equals(repairOperatorsArgument)) {
                 operatorSpace = new CardumenOperatorSpace();
-            } else if ("typesafe-space".equals(repairOperatorsArgument)) {
-                operatorSpace = new TypeSafeOperatorSpace();
+            } else if ("figra-space".equals(repairOperatorsArgument)) {
+                operatorSpace = new FigraOperatorSpace();
             } else
                 // Custom
                 if (repairOperatorsArgument != null && !repairOperatorsArgument.isEmpty())
@@ -1129,8 +1128,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
                     loadedTargetElementProcessors.add(new SingleStatementFixSpaceProcessor());
                 } else if (processor.equals("expression")) {
                     loadedTargetElementProcessors.add(new ExpressionIngredientSpaceProcessor());
-                } else if (processor.equals("typesafe-expression")) {
-                    loadedTargetElementProcessors.add((new TypeSafeExpressionIngredientSpaceProcessor()));
+                } else if (processor.equals("figra-expression")) {
+                    loadedTargetElementProcessors.add((new FigraIngredientSpaceProcessor()));
                 } else if (processor.equals("logical-relationaloperators")) {
                     loadedTargetElementProcessors.add(new IFExpressionFixSpaceProcessor());
                 } else if (processor.equals("if-conditions")) {

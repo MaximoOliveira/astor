@@ -16,19 +16,18 @@ import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TypeSafeExpressionTypeIngredientSpace extends ExpressionTypeIngredientSpace {
+public class FigraExpressionTypeIngredientSpace extends ExpressionTypeIngredientSpace {
 
     BinaryOperatorExpanderHelper binaryOperatorHelper;
     Expander expander;
     InvocationExpanderHelper invocationExpanderHelper = new InvocationExpanderHelper();
     protected Map<String, String> keysLocation = new HashMap<>();
 
-    public TypeSafeExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
+    public FigraExpressionTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
         super(processors);
         binaryOperatorHelper = new BinaryOperatorExpanderHelper();
         expander = new Expander();

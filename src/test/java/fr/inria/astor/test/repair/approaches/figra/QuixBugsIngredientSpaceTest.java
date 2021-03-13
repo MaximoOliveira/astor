@@ -1,13 +1,13 @@
-package fr.inria.astor.test.repair.approaches.typesafe;
+package fr.inria.astor.test.repair.approaches.figra;
 
-import fr.inria.astor.approaches.typesafe.ExpressionReplaceOperator;
-import fr.inria.astor.approaches.typesafe.TypeSafeApproach;
+import fr.inria.astor.approaches.figra.ExpressionReplaceOperator;
+import fr.inria.astor.approaches.figra.FigraApproach;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.TypeSafeProbabilisticIngredientStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.TypeSafeExpressionTypeIngredientSpace;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.FigraProbabilisticIngredientStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.FigraExpressionTypeIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
 import fr.inria.astor.test.repair.QuixBugsRepairTest;
 import fr.inria.main.CommandSummary;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  */
 public class QuixBugsIngredientSpaceTest {
 
-    private final String mode = ExecutionMode.TYPESAFE.name();
+    private final String mode = ExecutionMode.FIGRA.name();
 
     // Correct
     @Test
@@ -61,12 +61,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figraApproach = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figraApproach
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figraApproach.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "n ^ (n - 1)", 15);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -76,7 +76,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figraApproach, modPoint, ingredient);
 
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i -> i.toString().equals("n & (n - 1)")));
@@ -93,13 +93,13 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "arr", 22);
 
-        List<Ingredient> ingredientSpaceForSuspiciousElement = ingredientSpaceForSuspiciousElement(typeSafe, suspiciousElement);
+        List<Ingredient> ingredientSpaceForSuspiciousElement = ingredientSpaceForSuspiciousElement(figra, suspiciousElement);
         assert (ingredientSpaceForSuspiciousElement.stream().anyMatch(i -> i.toString().equals("counts")));
 
     }
@@ -116,13 +116,13 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "successors", 50);
 
@@ -142,12 +142,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "java_programs.GCD.gcd(a % b, b)", 19);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -159,7 +159,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
 
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i -> i.toString().equals("java_programs.GCD.gcd(b, a % b)")));
@@ -178,12 +178,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "bin_op.apply(a, b)", 34);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -194,7 +194,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
 
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i -> i.toString().equals("bin_op.apply(b, a)")));
@@ -212,12 +212,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "steps.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(start, helper))",
@@ -230,7 +230,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("steps.add(new java_programs.HANOI.Pair<java.lang.Integer, java.lang.Integer>(start, end))")));
@@ -248,12 +248,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "n", 18);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -265,7 +265,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("(n * n)")));
@@ -283,12 +283,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "end", 13);
@@ -312,7 +312,7 @@ public class QuixBugsIngredientSpaceTest {
         assert (ingredient2 != null);
 
         // correct one
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient2);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient2);
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("(mid + 1)")));
     }
@@ -328,12 +328,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "lo <= hi", 19);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -344,7 +344,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("lo != hi")));
@@ -362,12 +362,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "java_programs.FLATTEN.flatten(arr)", 26);
         List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
@@ -388,12 +388,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "k", 25);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -404,7 +404,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("k - num_lessoreq")));
@@ -422,12 +422,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "length_by_path", 41);
 
@@ -445,12 +445,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "true", 24);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -464,7 +464,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("depth == 0")));
@@ -482,12 +482,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar, "x", 16);
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
@@ -499,7 +499,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("0.5F * (approx + (x / approx))")));
@@ -517,12 +517,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "digit_list.length", 35);
@@ -547,12 +547,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "weight < j", 30);
@@ -565,7 +565,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("weight <= j")));
@@ -583,12 +583,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "b", 18);
@@ -601,7 +601,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("b.substring(1)")));
@@ -619,12 +619,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "arr.size()", 38);
@@ -637,7 +637,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("arr.size() / 2")));
@@ -655,12 +655,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "perm.get(j) < perm.get(i)", 19);
@@ -673,7 +673,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("perm.get(j) > perm.get(i)")));
@@ -691,12 +691,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "r", 22);
@@ -709,7 +709,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("c + 1")));
@@ -727,12 +727,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "1 + java_programs.LEVENSHTEIN.levenshtein(source.substring(1), target.substring(1))", 17);
@@ -745,7 +745,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("java_programs.LEVENSHTEIN.levenshtein(source.substring(1), target.substring(1))")));
@@ -763,12 +763,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "x > pivot", 26);
@@ -781,7 +781,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("x >= pivot")));
@@ -799,12 +799,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "weight_by_edge.put(edge, update_weight)", 30);
@@ -817,7 +817,7 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("weight_by_node.put(edge.get(1), update_weight)")));
@@ -835,12 +835,12 @@ public class QuixBugsIngredientSpaceTest {
         AstorMain main1 = new AstorMain();
         main1.execute(command.flat());
 
-        TypeSafeApproach typeSafe = (TypeSafeApproach) main1.getEngine();
+        FigraApproach figra = (FigraApproach) main1.getEngine();
 
-        TypeSafeExpressionTypeIngredientSpace ingredientSpace = (TypeSafeExpressionTypeIngredientSpace) typeSafe
+        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
                 .getIngredientSearchStrategy().getIngredientSpace();
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
+        ProgramVariant pvar = figra.getVariants().get(0);
 
         CtElement suspiciousElement = getSuspiciousElement(pvar,
                 "nextNode.getSuccessors()", 17);
@@ -853,25 +853,25 @@ public class QuixBugsIngredientSpaceTest {
         // ingredient  template exists
         assert (ingredient != null);
 
-        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(typeSafe, modPoint, ingredient);
+        List<Ingredient> ingredientsAfterTransformation = ingredientsAfterTransformation(figra, modPoint, ingredient);
         // verify that the solution is present
         assert (ingredientsAfterTransformation.stream().anyMatch(i ->
                 i.toString().equals("nextNode.getPredecessors()")));
 
     }
 
-    private List<Ingredient> ingredientsAfterTransformation(TypeSafeApproach typeSafe, ModificationPoint mp, Ingredient ingredient) {
-        TypeSafeProbabilisticIngredientStrategy ingredientStrategy = (TypeSafeProbabilisticIngredientStrategy) typeSafe.getIngredientSearchStrategy();
+    private List<Ingredient> ingredientsAfterTransformation(FigraApproach figra, ModificationPoint mp, Ingredient ingredient) {
+        FigraProbabilisticIngredientStrategy ingredientStrategy = (FigraProbabilisticIngredientStrategy) figra.getIngredientSearchStrategy();
         IngredientTransformationStrategy transformationStrategy = ingredientStrategy.getIngredientTransformationStrategy();
 
         return transformationStrategy.transform(mp, ingredient);
     }
 
 
-    private List<Ingredient> ingredientSpaceForSuspiciousElement(TypeSafeApproach typeSafe, CtElement suspiciousElement) {
+    private List<Ingredient> ingredientSpaceForSuspiciousElement(FigraApproach figra, CtElement suspiciousElement) {
 
-        ProgramVariant pvar = typeSafe.getVariants().get(0);
-        TypeSafeProbabilisticIngredientStrategy ingredientStrategy = (TypeSafeProbabilisticIngredientStrategy) typeSafe.getIngredientSearchStrategy();
+        ProgramVariant pvar = figra.getVariants().get(0);
+        FigraProbabilisticIngredientStrategy ingredientStrategy = (FigraProbabilisticIngredientStrategy) figra.getIngredientSearchStrategy();
 
         ModificationPoint modPoint = pvar.getModificationPoint(suspiciousElement);
         return ingredientStrategy.getNotExhaustedBaseElements(modPoint, new ExpressionReplaceOperator());

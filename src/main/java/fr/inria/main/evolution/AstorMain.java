@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-import fr.inria.astor.approaches.typesafe.TypeSafeApproach;
+import fr.inria.astor.approaches.figra.FigraApproach;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
@@ -89,8 +89,8 @@ public class AstorMain extends AbstractMain {
         } else if (ExecutionMode.SCAFFOLD.equals(mode)) {
             core = new ScaffoldRepairEngine(mutSupporter, projectFacade);
 
-        } else if (ExecutionMode.TYPESAFE.equals(mode)) {
-            core = new TypeSafeApproach(mutSupporter, projectFacade);
+        } else if (ExecutionMode.FIGRA.equals(mode)) {
+            core = new FigraApproach(mutSupporter, projectFacade);
 
         } else {
             // If the execution mode is any of the predefined, Astor

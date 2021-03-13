@@ -2,9 +2,9 @@ package fr.inria.astor.core.manipulation.filters;
 
 import spoon.reflect.code.*;
 
-public class TypeSafeExpressionIngredientSpaceProcessor extends TargetElementProcessor<CtExpression> {
+public class FigraIngredientSpaceProcessor extends TargetElementProcessor<CtExpression> {
 
-    public TypeSafeExpressionIngredientSpaceProcessor() {
+    public FigraIngredientSpaceProcessor() {
         super();
 
     }

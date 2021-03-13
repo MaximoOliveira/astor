@@ -10,8 +10,8 @@ import spoon.reflect.declaration.CtElement;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TypeSafeExpressionClassTypeIngredientSpace extends TypeSafeExpressionTypeIngredientSpace {
-    public TypeSafeExpressionClassTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
+public class FigraExpressionClassTypeIngredientSpace extends FigraExpressionTypeIngredientSpace {
+    public FigraExpressionClassTypeIngredientSpace(List<TargetElementProcessor<?>> processors) throws JSAPException {
         super(processors);
     }
 

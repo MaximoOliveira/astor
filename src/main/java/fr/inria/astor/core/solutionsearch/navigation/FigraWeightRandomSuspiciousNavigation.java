@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TypeSafeWeightRandomSuspiciousNavigation implements SuspiciousNavigationStrategy {
+public class FigraWeightRandomSuspiciousNavigation implements SuspiciousNavigationStrategy {
     @Override
     public List<ModificationPoint> getSortedModificationPointsList(List<ModificationPoint> modificationPoints) {
 

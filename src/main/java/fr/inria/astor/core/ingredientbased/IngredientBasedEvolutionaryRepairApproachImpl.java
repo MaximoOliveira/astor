@@ -19,7 +19,7 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.ProbabilisticIngredientStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.SimpleRandomSelectionIngredientStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.TypeSafeProbabilisticIngredientStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.FigraProbabilisticIngredientStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.ExpressionTypeIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.GlobalBasicIngredientSpace;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.LocalIngredientSpace;
@@ -225,8 +225,8 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 			} else if (ingStrategySt.equals("name-probability-based")) {
 				ingStrategy = new ProbabilisticIngredientStrategy(ingredientspace);
 
-			} else if (ingStrategySt.equals("typesafe-name-probability-based")){
-				ingStrategy = new TypeSafeProbabilisticIngredientStrategy(ingredientspace);
+			} else if (ingStrategySt.equals("figra-name-probability-based")){
+				ingStrategy = new FigraProbabilisticIngredientStrategy(ingredientspace);
 
 			} else if (ingStrategySt.equals("code-similarity-based")) {
 				ingStrategy = new CloneIngredientSearchStrategy(ingredientspace);
@@ -265,8 +265,8 @@ public abstract class IngredientBasedEvolutionaryRepairApproachImpl extends Evol
 				ingredientTransformationStrategyLoaded = (new ClusterIngredientTransformation());
 			} else if (ingredientTransformationStrategy.equals("name-probability-based")) {
 				ingredientTransformationStrategyLoaded = (new ProbabilisticTransformationStrategy());
-			} else if(ingredientTransformationStrategy.equals("typesafe-name-probability-based")){
-				ingredientTransformationStrategyLoaded = new TypeSafeProbabilisticTransformationStrategy();
+			} else if(ingredientTransformationStrategy.equals("figra-name-probability-based")){
+				ingredientTransformationStrategyLoaded = new FigraProbabilisticTransformationStrategy();
 			}
 			else {
 				ingredientTransformationStrategyLoaded = ((IngredientTransformationStrategy) PlugInLoader

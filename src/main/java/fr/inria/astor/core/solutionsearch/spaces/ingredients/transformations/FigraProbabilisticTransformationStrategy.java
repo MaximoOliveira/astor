@@ -2,17 +2,14 @@ package fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.core.entities.Ingredient;
-import fr.inria.astor.core.entities.IngredientFromDyna;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.manipulation.sourcecode.VarAccessWrapper;
 import fr.inria.astor.core.manipulation.sourcecode.VarCombinationForIngredient;
 import fr.inria.astor.core.manipulation.sourcecode.VarMapping;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
-import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
 import fr.inria.astor.util.MapCounter;
 import org.apache.log4j.Logger;
 import spoon.reflect.code.CtCodeElement;
-import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
@@ -21,13 +18,13 @@ import spoon.reflect.declaration.CtVariable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TypeSafeProbabilisticTransformationStrategy extends CacheTransformationStrategy
+public class FigraProbabilisticTransformationStrategy extends CacheTransformationStrategy
         implements IngredientTransformationStrategy {
 
-    protected Logger logger = Logger.getLogger(TypeSafeProbabilisticTransformationStrategy.class.getName());
+    protected Logger logger = Logger.getLogger(FigraProbabilisticTransformationStrategy.class.getName());
     protected NGramManager ngramManager = new NGramManager(null, null);
 
-    public TypeSafeProbabilisticTransformationStrategy() {
+    public FigraProbabilisticTransformationStrategy() {
         super();
     }
 
