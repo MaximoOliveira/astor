@@ -3,10 +3,7 @@ package fr.inria.astor.util.expand;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import org.paukov.combinatorics3.Generator;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldAccess;
-import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.UnaryOperatorKind;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.CodeFactory;
@@ -149,7 +146,7 @@ public class InvocationExpanderHelper {
             var.getVariable().setSimpleName(abstractName);
             // workaround: Problems with var Shadowing
             var.getFactory().getEnvironment().setNoClasspath(true);
-            if (var instanceof CtFieldAccess) {
+            if (var instanceof CtFieldAccess && !(var instanceof CtFieldWrite)) {
                 ((CtFieldReference)var.getVariable()).setDeclaringType(var.getType());
                 ((CtFieldReadImpl) var).setTarget(null);
                 ((CtFieldReference)var.getVariable()).setStatic(false);
