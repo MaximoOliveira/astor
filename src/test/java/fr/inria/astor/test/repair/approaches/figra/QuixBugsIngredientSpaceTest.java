@@ -353,32 +353,6 @@ public class QuixBugsIngredientSpaceTest {
 
     // Correct
     @Test
-    public void test_FLATTEN_ingredientSpace() throws Exception {
-
-        CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("flatten");
-        command.command.put("-mode", mode);
-        command.command.put("-maxgen", "0");
-
-        AstorMain main1 = new AstorMain();
-        main1.execute(command.flat());
-
-        FigraApproach figra = (FigraApproach) main1.getEngine();
-
-        FigraExpressionTypeIngredientSpace ingredientSpace = (FigraExpressionTypeIngredientSpace) figra
-                .getIngredientSearchStrategy().getIngredientSpace();
-
-        ProgramVariant pvar = figra.getVariants().get(0);
-
-        CtElement suspiciousElement = getSuspiciousElement(pvar, "java_programs.FLATTEN.flatten(arr)", 26);
-        List<Ingredient> ingredients = ingredientSpace.getIngredients(suspiciousElement);
-        Ingredient ingredient = ingredients.stream().filter(i ->
-                i.toString().equals("arr")).findFirst().orElse(null);
-        // ingredient exists
-        assert (ingredient != null);
-    }
-
-    // Correct
-    @Test
     public void test_KTH_ingredientSpace() throws Exception {
 
         CommandSummary command = QuixBugsRepairTest.getQuixBugsCommand("kth");
